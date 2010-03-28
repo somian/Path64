@@ -1,8 +1,4 @@
-!  Copyright (C) 2008 PathScale, LLC.  All Rights Reserved.
-!
-!  Copyright (C) 2006. QLogic Corporation. All Rights Reserved.
-!
-!  Copyright (C) 2005, 2006 PathScale, Inc. All rights reserved.
+!  Copyright (C) 2005, 2006, 2008 PathScale Inc. All rights reserved.
 !                                                                               
 !  Copied from the OpenMP Application Program Interface Version 2.5 Public
 !  Draft, November 2004.
