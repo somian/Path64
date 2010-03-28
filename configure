@@ -1,0 +1,235 @@
+#!/bin/bash
+# Copyright (C) PathScale Inc. 2009
+#
+#
+# This file will create defs.mk and pathscale/include/pathscale_defs.h
+
+# TODO: Don't make it hard coded 
+DEFS_MK=pathscale/defs.mk
+
+# Should be the only function above parsing the command line options
+# Define all the possible arguments we support
+# Please keep the formating to use spaces and pretty
+helpme () {
+        echo ""
+        echo "Options :"
+        echo "  --help                      - Display this menu"
+        echo "  --prefix                    - Change installation root prefix to use.  Defaults to /opt/pathscale"
+        echo "  --libdir                    - Change libdir to use. Defaults to lib"
+        echo "  --name-prefix               - Change default library and binary name prefix. Defaults to \"path\""
+        echo "  --with-fortran-compiler     - Manually specify the Fortran compiler to be used and does not check if exists"
+        echo "  --build-fortran=true|false  - Build Fortran compiler. Defaults to true"
+	echo "  --build-openmp=true|false   - Build OpenMP. Defaults to true. ( GCC-4.2 or later required ) "
+        echo ""
+        echo "For example ./configure --prefix=/opt/compiler"
+        echo ""
+}
+
+
+# Parse the command line options
+# Apologies for this not being readable
+while true; do
+	case "$1" in
+		-h|--help|-\?) export NEED_HELP=true; break;;
+
+		--prefix|--prefix=*) t=`echo $1 | awk 'BEGIN { FS = "=" } ; { print $2 }'` ; if [ -z $t ]; then  echo "Error : No value passed to --prefix" ; helpme ; exit 1 ; fi ; export WITH_PREFIX="$t" ; shift ;;
+
+		--libdir|--libdir=*) t=`echo $1 | awk 'BEGIN { FS = "=" } ; { print $2 }'` ; if [ -z $t ]; then  echo "Error : No value passed to --libdir" ; helpme ; exit 1 ; fi ; export WITH_LIBDIR="$t"; shift;;
+
+		--name-prefix|--name-prefix=*) t=`echo $1 | awk 'BEGIN { FS = "=" } ; { print $2 }'` ; if [ -z $t ]; then  echo "Error : No value passed to --name-prefix" ; helpme ; exit 1 ; fi ; export PSC_NAME_PREFIX="$t"; shift;;
+
+		--with-fortran-compiler|--with-fortran-compiler=*) t=`echo $1 | awk 'BEGIN { FS = "=" } ; { print $2 }'` ; if [ -z $t ]; then  echo "Error : No value passed to --with-fortran-compiler" ; helpme ; exit 1 ; fi ; export WITH_FORTRAN_COMPILER="$t"; shift;;
+
+		--build-fortran|--build-fortran=*) t=`echo $1 | awk 'BEGIN { FS = "=" } ; { print $2 }'` ; if [ -z $t ]; then  echo "Error : No value passed to --build-fortran" ; helpme ; exit 1 ; fi ; export BUILD_FORTRAN="$t"; shift;;
+
+		--build-openmp|--build-openmp=*) t=`echo $1 | awk 'BEGIN { FS = "=" } ; { print $2 }'` ; if [ -z $t ]; then  echo "Error : No value passed to --build-openmp" ; helpme ; exit 1 ; fi ; export BUILD_OPENMP="$t"; shift;;
+
+	--) shift; break;;
+	-*) echo "Invalid option: $1"; export NEED_HELP=true; shift;; 
+	*)  break;;
+	esac
+done
+
+gcc_test() {
+	export GCC_VERSION=`gcc -v 2>&1 | tail -1 | awk '{print $3 }' | cut -c 1-3 | awk '{print $1 * 10}'`
+	export PSC_GCC_VERSION=`gcc -v 2>&1 | tail -1 | awk '{print $3 }'`
+	echo "export PSC_GCC_VERSION := ${PSC_GCC_VERSION}" >> ${DEFS_MK}
+}
+
+prefix() {
+        if [ "$1" == "" ] ;then
+          export WITH_PREFIX=/opt/pathscale
+        fi
+}
+
+libdir() {
+        if [ "$WITH_LIBDIR" == "" ] ;then
+          export WITH_LIBDIR=lib
+        fi
+}
+
+nameprefix() {
+        if [ "$PSC_NAME_PREFIX" == "" ] ;then
+          export PSC_NAME_PREFIX=path
+        fi
+}
+
+pathscaledefs() {
+# TODO > Pull variables from defaults and command line options
+#
+rm -f pathscale/targia32_x8664/include/pathscale_defs.h
+rm -f pathscale/targia32_builtonia32/include/pathscale_defs.h
+rm -f pathscale/targx8664_builtonia32/include/pathscale_defs.h
+ 
+cat > pathscale/include/pathscale_defs.h << EOF 
+#ifndef __pathscale_defs_h
+#define __pathscale_defs_h
+#define PSC_MAJOR_VERSION "3"
+#define PSC_MINOR_VERSION "3"
+#define PSC_FULL_VERSION "3.3"
+#define PSC_NAME_PREFIX "path"
+/*#define PSC_TARGET "ia64-open64-linux" */
+#define PSC_GCC_VERSION "${PSC_GCC_VERSION}"
+#define PSC_GCC40_VERSION PSC_GCC_VERSION
+#define PSC_GCC42_VERSION PSC_GCC_VERSION
+#define PSC_INSTALL_PREFIX "$WITH_PREFIX"
+#define PSC_PATCH_LEVEL "0"
+#define PSC_ROOT_PREFIX  "$WITH_PREFIX"
+#define PSC_TARGET "x86_64-pathscale-linux"
+#define BINPATH "$WITH_PREFIX/bin"
+#define NAMEPREFIX "path"
+#define LIBPATH "/" "$WITH_LIBDIR"
+#define ALTBINPATH      BINPATH
+#define ALTLIBPATH      LIBPATH
+#define PHASEPATH       PSC_INSTALL_PREFIX LIBPATH
+#define GNUPHASEPATH	PHASEPATH
+#endif
+EOF
+
+}
+
+nativeonly() {
+        echo "export BUILD_LIB_TYPE := NATIVEONLY" >> ${DEFS_MK}
+}
+
+compiler_cc() {
+        echo "export NEWLCC := gcc " >> ${DEFS_MK}
+        # Currently valid values are GNU or PSC
+        echo "export BUILD_COMPILER := GNU" >> ${DEFS_MK}
+}
+
+compiler_cxx() {
+          echo "export NEWLCXX := g++ " >> ${DEFS_MK}
+}
+
+build_fortran() {
+
+	if [ "$BUILD_FORTRAN" == "" ] ; then
+		echo "Fortran build enabled"
+		export BUILD_FORTRAN=true
+	elif [[ ("$BUILD_FORTRAN" != "true" && "$BUILD_FORTRAN" != "false") ]] ; then
+		echo "Warning : You specified an incorrect value to --build-fortran"
+		echo "Fortran build disabled"
+		export BUILD_FORTRAN=false
+	elif [ "$BUILD_FORTRAN" == "false" ] ; then
+		echo "Fortran build disabled"
+	elif [ "$BUILD_FORTRAN" == "false" ] ; then
+		echo "Fortran build enabled"
+		export BUILD_FORTRAN=true
+	fi
+	echo 'export BUILD_FORTRAN=' "${BUILD_FORTRAN}" >> ${DEFS_MK}
+}
+
+compiler_fortran() {
+
+# To keep the order of functions below clean we'll include the test of whether to build the fortran compiler here
+if [ "$BUILD_FORTRAN" == "true" ] ;then
+
+	if [ "$WITH_FORTRAN_COMPILER" != "" ] ; then
+		echo "export NEWLF90 := "$WITH_FORTRAN_COMPILER"  " >> ${DEFS_MK}
+		echo "Using the "$WITH_FORTRAN_COMPILER" Fortran compiler"
+	elif [ -e "$(which pathf90)" ] ; then
+		echo "export NEWLF90 := `which pathf90`  " >> ${DEFS_MK}
+		echo "Using the `which pathf90` Fortran compiler"
+	elif [ -e "$(which gfortran)" ] ; then 
+		echo "export NEWLF90 := `which gfortran` " >> ${DEFS_MK}
+		echo "Using the "`which gfortran`" Fortran compiler"
+	else
+		echo "Couldn't find a suitable Fortran compiler"
+	fi
+
+	# F77 is deprecated and so just keeping for legacy convenience
+	echo 'export F90=$(NEWLF90)' >> ${DEFS_MK}
+	echo 'export F77=$(NEWLF90)' >> ${DEFS_MK}
+fi
+
+}
+
+
+build_openmp() {
+
+	if [[ ("$GCC_VERSION" -gt 41 && "$BUILD_OPENMP" == "") || "$BUILD_OPENMP" == "true" ]] ; then
+		echo 'export BUILD_OPENMP=true' >> ${DEFS_MK}
+		echo "Building OpenMP"
+	else
+		echo "Disabling OpenMP"
+	fi
+}
+
+defsmk() {
+rm ${DEFS_MK}
+# Examples of stuff that needs to be replaced
+echo "export PSC_MAJOR_VERSION := 3" >> ${DEFS_MK}
+echo "export PSC_MINOR_VERSION := 2" >> ${DEFS_MK}
+echo "export PSC_PATCH_LEVEL := 99" >> ${DEFS_MK}
+echo "export PSC_EXTRA_VERSION := " >> ${DEFS_MK} # Could be -custom or something
+echo "export PSC_FULL_VERSION := \$(PSC_MAJOR_VERSION).\$(PSC_MINOR_VERSION).\$(PSC_PATCH_LEVEL)\$(PSC_EXTRA_VERSION)" >> ${DEFS_MK}
+echo "export PSC_ARCH_64 := x86_64" >> ${DEFS_MK}
+echo "export PSC_ARCH_32 := i386" >> ${DEFS_MK}
+echo "export PSC_ARCH := \$(PSC_ARCH_64)" >> ${DEFS_MK}
+echo "export PSC_TARGET_64 := \$(PSC_ARCH_64)-pathscale-linux" >> ${DEFS_MK}
+echo "export PSC_TARGET_32 := \$(PSC_ARCH_32)-pathscale-linux" >> ${DEFS_MK}
+echo "export PSC_TARGET := \$(PSC_TARGET_64)" >> ${DEFS_MK}
+echo "export PSC_ROOT_PREFIX := ${WITH_PREFIX}" >> ${DEFS_MK}
+echo "export PSC_PREFIX := \$(PSC_ROOT_PREFIX)\/lib\/gcc-lib/\$(PSC_TARGET)" >> ${DEFS_MK}
+echo "export PSC_INSTALL_PREFIX := \$(PSC_PREFIX)" >> ${DEFS_MK}
+echo "export PSC_NAME_PREFIX := path" >> ${DEFS_MK}
+echo "export PSC_INCLUDE_DIR := \$(PSC_INSTALL_PREFIX)/lib/gcc-lib/\$(PSC_TARGET)/pathscale-\$(PSC_FULL_VERSION)/include/" >> ${DEFS_MK}
+echo "export PSC_LIB_DIR := \$(PSC_ROOT_PREFIX)/${WITH_LIBDIR}/\$(PSC_FULL_VERSION)" >> ${DEFS_MK}
+echo "export PSC_MATH := \$(PSC_NAME_PREFIX)" >> ${DEFS_MK}
+echo "export BUILD_OS := " $(uname | tr '[:lower:]' '[:upper:]') >> ${DEFS_MK}
+cd .
+}
+
+# Catch in case help was needed
+if [ "${NEED_HELP}" == true ] ; then
+	helpme;
+fi
+
+# Setup default values and run sanity checks
+gcc_test
+prefix
+libdir
+nameprefix
+nativeonly
+compiler_cc
+compiler_cxx
+# Before we test which fortran compiler to use determine if it should be built at all
+build_fortran
+compiler_fortran
+build_openmp
+# pathscaledefs defsmk depends on lots of things to put it at the bottom 
+pathscaledefs
+defsmk
+
+# TODO : Check for bison, libelf, libdwarf and flex
+# TODO : Remove the check for bison and flex once gcc build is away from autocrap
+# TODO : export BUILD_LIB_TYPE := NATIVEONLY
+# TODO : compiler export NEWLCC := gcc
+# TODO : NEWLCFLAGS= -m32
+# TODO : NEWLCXXFLAGS= -m32
+# TODO : NEWLLDFLAGS= -m32
+# TODO : Test if BUILD_COMPILER := GNU and then set correctly
+# TODO : Remove exports from pathscale/Makefile and push all to defs.mk
+# TODO : Add a configure option to define NO_LICENSE_CHECK
+# TODO : BINPATH should be a configure option

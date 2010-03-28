@@ -1,0 +1,77 @@
+# Some of the contents of this file have been taken from http://wiki.open64.net
+
+arith - The Arithmetic Constant Expression Evaluator for the Cray Frontend 
+be
+    * be - Makefile suggests this builds the 32 bit host/target version of the code generator (see driver.cxx)
+    * cg - Code Generator (Well documented). Contains lots of target specific information especially expr_* files
+          o gra_mon - Builds GRA structures from flow graph
+          o whirl2ops.cxx - Driver to control WHIRL -> CG -> OPs 
+    * com - Backend Common Functions
+          o fb_whirl - Read feedback file and annotate WHIRL tree with frequency information
+          o weak - GCC Run time linker 'weak symbols' fix
+          o Whirl2Src - Interface to whirl2c/whirl2f can print WHIRL in source form 
+    * lno - Target specific stuff for the Loop Nest Optimiser
+    * opt - Whirl Optimiser (WOpt)
+    * prompf_anl - ProMpf Analysis File Generation which is the map used be whirl2c/whirl2f and by the Loop Nest Optimiser
+    * region - Binary Region Generation for the PUs
+    * VHO - Very High Optimiser
+    * Whirl2c - Translation between the (Very) High Level WHIRL into C)
+    * Whirl2f - Translation between the (Very) High Level WHIRL into Fortran) 
+clibinc
+clibroot - Cray Specifics? 
+common - Essential files for porting
+    * targ_info - Target specifics
+          o isa - Fundamental to new ports
+          o proc - Fundamental to new ports
+          o abi - Fundamental to new ports 
+crayf90 - ? 
+cygnus - This directory contains the binutils-2.16.1 linker that is modified to handle IPA.  The IPA enhencements are extracted from the corresponding files in the cygnus_20000828 directory from the original open64 release
+driver - The minimal front-end which determines which drives the phases and parameters of the compiler
+f95_coco - ?
+fake_ld - is used by IPA to deal with symbol resolution of .o and .so as well as LD_LIBRARY_PATH
+include - Standard included files (Some of which should be removed)
+instrumentation
+	libinstr - Used to store frequency counts during run of an instrumented program unit (inserted into WHIRL code) 
+	libinstr2 - Minor differences to libinstr, but unsure what they are
+ipa - Interprocedural Analysis & Optimisiation 
+ipa_link - This directory contains the binutils-2.17.50.0.6 linker that is modified for IPA
+ir_tools - WHIRL file manipulators 
+libcif - compiler information file (CIF) library routines
+	http://docs.cray.com/books/SR-2401_2.1.1/ 
+	http://docs.cray.com/books/SR-2401_2.1.1/html-SR-2401_2.1.1/njbhf1ddsmg.html
+	http://web.mit.edu/annakot/MacData/afs/athena.mit.edu/software/sunsoft_v5.1/man/man3/
+
+libcmplrs - ?
+libcsup - ?
+libdwarf - Imported GNU libdwarf 
+libelf - Imported GNU libelf
+libelfutil - Library for xlate sections and leb128 numbers - http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi?coll=0650&db=man&fname=/usr/share/catman/p_man/cat5/libelfutil.z
+libf - ?
+libF77 - Non-I/O portion of libf2c
+libf90 - ?
+libfi - ?
+libfoobar - Minor things like the runtime startup code. libpathfortran.so gets built in libfoobar by combining that runtime startup code, libF77, libu, libfi, etc.
+libfortran
+libhugetlbfs
+libI77 - I/O portion of libf2c - libU77 is inherited from the old GNU "g77" compiler, and provides Fortran-callable functions corresponding to those in the C standard library; some user programs do call these
+libiberty - A collection of subroutines used by various GNU programs
+libm - Math functions
+libmpath - PathScale optimized math functions
+libopenmp - OpenMP library
+libpscrt - PathScale optimized runtime code
+libu - libu is runtime code from Cray/SGI--"real" code used for I/O, etc. But some of it may be a candidate for pruning. The compiler originally supported I/O compatibility with a variety of OSes (e.g. it could read and write VAX floating point format) but it's not clear to me that it has continued to work after the transition from SGI to pathscale
+libU77 - Additional interfaces to libc for libf2c - libU77 is inherited from the old GNU "g77" compiler, and provides Fortran-callable functions corresponding to those in the C standard library; some user programs do call these
+libunwind - Not used and should probably be replaced by GNU libunwind
+linux - Some standard includes and also defines basics for the build process 
+tools - Helper tools. (should probably be moved to a new source tree)
+wgen - WHIRL generation/Frontend
+
+    * wgen_stmt - Translate GNU STMT trees to WHIRL
+    * wgen_spin_symbol - Translate GNU DECL trees to symtab references
+    * wgen_misc
+    * wgen_decl - Translate DECL trees to WHIRL
+    * wgen_expr - GNU Expression trees to WHIRL
+    * wgen_dst - Extracts from EDG Frontend Intermediate Representation, the information for the backend to generate DWARF sections
+    * varasm - Ripped from GCC contains Output types, declarations for variables, consts and externals
+    * main - Main Driver for wgen driver. Performs Spin to WHIRL via libspin
+    * c_int_model - C Data type models/C integer model support 

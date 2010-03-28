@@ -1,0 +1,242 @@
+.\" '\" Copyright (C) 2007 PathScale, LLC.  All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2006, 2007 QLogic Corporation. All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2003, 2004, 2005 PathScale, Inc.  All Rights Reserved.
+.\" '\"
+.\" '\"Contact information:  PathScale, LLC., 2071 Stierlin Court, Suite 200,
+.\" '\"Mountain View CA 94043, USA, or:
+.\" '\"
+.\" '\"http://www.pathscale.com
+.\" '\"
+.TH "assign" "1" "" "PathScale, LLC." "PathScale Compiler Suite"
+.SH "NAME"
+\fBassign\fR
+\- Assign customizations to Fortran file I/O
+.SH "SYNOPSIS"
+\fBassign\fR
+[\fIcommand-options\fR]
+[\fIcustomize-options\fR]
+[\fIfilespec\fR]
+.SH "DESCRIPTION"
+The \fBassign\fR command customizes the behavior of Fortran I/O for a
+certain set of files or logical units (for example, it can swap bytes
+when using big-endian files on a little-endian computer). By issuing
+the command several times, you can dictate different customizations
+for each of several sets of files or units.
+.PP
+The \fIcommand-options\fR relate to the command itself; the
+\fIcustomize-options\fR describe the desired behavior, and the
+\fIfilespec\fR describes which files or logical units those
+customizations apply to. Each command allows multiple
+\fIcustomize-options\fR, but no more than one \fIcommand-option\fR and
+one \fIfilespec\fR.
+.PP
+The command works by storing information into a file that the Fortran
+library inspects before performing I/O. You must set the environment variable
+FILENV to the name of that file before you type the \fBassign\fR
+command, and it must remain set when the program runs.
+.PP
+The \fBpathf95\fR(1) compiler also provides compile-time options for
+swapping bytes that are simpler to use. Setting FILENV overrides the
+compiled-in choices.
+.SH "FILESPEC"
+The \fIfilespec\fR can be:
+.TP
+\fBu:unit\fR
+The logical unit numbered \fIunit\fR.
+.TP
+\fBf:filename\fR
+The file whose name is \fIfilename\fR.
+.TP
+\fBp:pattern\fR
+Every file whose name matches \fIpattern\fR, using
+the \fB%\fR symbol as a wildcard which matches zero or more characters.
+.TP
+\fBg:du\fR
+Every direct unformatted file (e.g., files opened using "access='direct'
+form='unformatted'").
+.TP
+\fBg:su\fR
+Every sequential unformatted file (e.g., files opened using "access='sequential'
+form='unformatted'").
+.TP
+\fBg:all\fR
+Every file.
+.SH "COMMAND OPTIONS"
+.TP
+\fB-R\fR
+Remove all customizations for the specified \fIfilespec\fR.  If no
+\fIfilespec\fR is specified, remove all customizations.
+.TP
+\fB-I\fR
+Add this command to any previous ones.  Normally each \fBassign\fR
+command erases the effect of all previous \fBassign\fR commands, even
+if they refer to a different set of files.  To allow more than one
+command to take effect at the same time, all but the first command
+must use \fB\-I\fR.
+.TP
+\fB-O\fR
+Erase the effect of previous \fBassign\fR commands before adding the
+current command. This is the default.
+.TP
+\fB-V\fR
+Display all \fBassign\fR commands now in effect.
+.SH "CUSTOMIZATION OPTIONS"
+.TP
+.TP
+\fB-a \fIname\fR
+Use \fIname\fR as the actual file name for the file specified by
+\fIfilespec\fR, overriding any name provided by the \fIFILE=\fR
+specifier in an \fIOPEN\fR statement.
+.TP
+\fB-F \fIconversion\fR Convert the byte ordering of each record header
+(a four-byte record length which appears at the beginning and end of
+each record) in a sequential unformatted file.  It is allowed only
+with unformatted files.  The option has no effect on the data itself
+(see the \fB\-N\fR option for that).  The \fIconversion\fR may be:
+.RS
+.TP 4
+\fBf77.mips\fR
+On a little-endian computer, use big-endian format for each record header.
+.TP
+\fBf77.vax\fR
+On a big-endian computer, use little-endian format for each record header.
+.RE
+.TP
+\fB\-N \fIconversion\fR
+Convert the byte ordering of the data in an unformatted file. It is
+allowed only with unformatted files. For sequential unformatted files,
+which have record headers, you will usually want to use the \fB\-F\fR
+option as well so that the record headers are also converted. The
+\fIconversion\fR may be:
+.RS
+.TP 4
+\fBbe\fR
+On a little-endian computer, use big-endian format for the data.
+.TP
+\fBia64\fR
+On a big-endian computer, use little-endian format for the data.
+.RE
+.TP
+\fB\-S on|off\fR 
+The \fB\-S off\fR option generates commas in list-directed or namelist
+output on files specified by \fIfilespec\fR. The default is \fB\-S
+on\fR. For example, if the default output would be "4 5 6", \fB\-S off\fR
+produces "4, 5, 6".
+.TP
+\fB\-y on|off\fR
+The \fB\-y off\fR option allows the use of repetition factors in
+list-directed or namelist
+output on files specified by \fIfilespec\fR. The default
+is \fB\-y on\fR.  For example, if the default output would be "4 4 4",
+\fB\-y off\fR produces "3*4".
+.SH "EXAMPLES"
+Assign name \fItmp\fR to unit 8, removing any previous \fBassign\fR commands
+whether or not they relate to unit 8:
+.PP
+.ft B
+        % assign -a tmp u:8
+.ft R
+.PP
+Assign name \fItmp\fR to unit 8 without removing any previous \fBassign\fR
+commands:
+.PP
+.ft B
+        % assign -I -a tmp u:8
+.ft R
+.PP
+Convert numeric data from big-endian format when reading file
+\fIdata\fR, and convert numeric data to big-endian format when writing
+that file (note that if the file is sequential, its record headers
+will remain in little-endian form unless you also use the \fB\-F\fR
+option):
+.PP
+.ft B
+        % assign -I -N be f:data
+.ft R
+.PP
+Allow repetition factors in list-directed output on any file whose name
+begins with \fBx\fR and ends with \fBy\fR:
+.PP
+.ft B
+        % assign -I -y off p:x%y
+.ft R
+.PP
+For all direct unformatted files, convert numeric data from big-endian
+format on input, and generate big-endian format on output:
+.PP
+.ft B
+        % assign -I -N be g:du
+.ft R
+.PP
+For all sequential unformatted files, convert data from big-endian format on
+input, and generate big-endian format on output ( the \fB\-N\fR option); do
+likewise with the record headers (the \fB\-F f77.mips\fR option):
+.PP
+.ft B
+        % assign -I -N be -F f77.mips g:su
+.ft R
+.PP
+Allow the use of repetition factors on standard output (unit 6):
+.PP
+.ft B
+	% assign -I -y off u:6
+.ft R
+.SH "USING ASSIGN WITH MPI"
+When using assign with MPI, make sure that the environment variable FILENV is
+properly defined and that the assign file is accessible by each process. The
+mpirun program is not going to set the environment variable for you, so you need
+to have a wrapper-script that sets it. 
+.PP
+You can  define FILENV in your .cshrc or .bashrc file with these commands:
+.PP
+For bash:
+.PP
+.ft B
+#The following will concatenate the line 'export FILENV=.assign' to the
+#end of your .bashrc. The ${HOME}/ is so that you can use this from any
+#directory.
+  % echo "export FILENV=.assign" >> ${HOME}/.bashrc
+.ft R
+.PP
+For csh:
+.PP
+.ft B
+#The following will concatenate the line 'setenv FILENV .assign' to the
+#end of your .cshrc.  The ${HOME}/ is so that you can use this from any
+#directory
+  % echo "setenv FILENV .assign" >>  ${HOME}/.cshrc
+.ft R 
+.PP
+If you are using an MPI process with a daemon startup, define FILENV
+by passing environment variables through a daemon. This is often MPI
+implementation-dependent.
+.PP
+For example, LAM/MPI supports defining FILENV through the \fB\-x\fR option on
+mpirun, so your commands would look something like this (in bash):
+.PP
+.ft B
+        % export FILENV=.assign
+        % mpirun -np 2 -x FILENV foo
+.ft R
+.PP
+This would launch the \fIfoo\fR program on 2 processes, each aware of the
+FILENV variable.
+.SH "ENVIRONMENT"
+.TP
+\fBFILENV\fR
+The location of the assign file.
+.SH "COPYRIGHT"
+Copyright (C) 2007 PathScale, LLC.  All Rights Reserved.
+.PP
+Copyright (C) 2006, 2007 QLogic Corp.  All Rights Reserved.
+.PP
+Copyright (C) 2004, 2005 PathScale, Inc.  All Rights Reserved.
+.SH "SEE ALSO"
+.PP
+\fBpathf95\fR(1)
+.PP
+PathScale Compiler Suite User Guide
+.PP
+Online documentation available at http://www.pathscale.com/docs.html

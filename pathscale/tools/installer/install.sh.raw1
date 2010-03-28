@@ -1,0 +1,10 @@
+#!/bin/bash
+thisone=install
+dir=/tmp/psc-$$-$RANDOM
+mkdir ${dir}
+chmod a+rwx ${dir}
+sed -ne 'TAROFF,$p' ${thisone} > ${dir}/${thisone}.tar
+tar  -C ${dir} -xvf ${dir}/${thisone}.tar
+chmod a+x ${dir}/*.py
+${dir}/install.py -t ${dir}
+exit 0

@@ -1,0 +1,1424 @@
+.\" '\" Copyright (C) 2007, 2008, 2009 PathScale, LLC.  All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2006, 2007 QLogic Corporation. All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2003, 2004, 2005, 2006 PathScale, Inc.  All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2000, 2001 Silicon Graphics, Inc.  All Rights Reserved.
+.\" '\" This information is free software. For details about the redistribution
+.\" '\" and modification rights, see the copyright to the 0.9 SGI Pro64 sgif90
+.\" '\" compiler or the SGI Pro64 sgicc compiler which releases on Linux
+.\" '\" systems.
+.\" '\"
+.\" .ad l
+.TH "pathf95" "1" "" "PathScale, LLC." "PathScale Compiler Suite"
+.SH "NAME"
+\fBpathf95\fR,
+\fBpathf90\fR
+\- Invoke the PathScale(TM) Fortran 77, 90, and 95 compilers
+.SH "SYNOPSIS"
+\fBpathf95\fR [\fI-option-list\fR] \fIfiles\fR
+'\"
+.SH "DESCRIPTION"
+This man page describes the \fBpathf95\fR(1) command, which invokes the
+PathScale(TM) Fortran 77, Fortran 90, and Fortran 95
+compiler.  The \fBpathf90\fR(1) command is an alias for \fBpathf95\fR.
+Typically, the \fBpathf95\fR command processes the input files named
+on the command line and generates a binary object file.  The loader
+loads the binary object file and generates file \fBa.out\fR.
+.PP
+A complete list of available options can be found in the \fBeko(7)\fR man page.
+.PP
+The PathScale Fortran compiler recognizes code as being in
+either fixed-form (f77 72-column) format or free-form (f90) format,
+rather than Fortran 77, Fortran 90, or Fortran 95. By default, input
+files suffixed with \fB.f\fR or \fB.F\fR are assumed to be written in
+fixed source form (f77), and input files suffixed with \&\fB.f90\fR,
+\&\fB.F90\fR, \&\fB.f95\fR, or \&\fB.F95\fR are assumed to be written
+in free source form. You can use the \fB\-freeform\fR or
+\fB\-fixedform\fR flags to override these defaults. The suffixes with
+uppercase "F" cause the C preprocessor (\fBcpp\fR) to run, as if the
+\fB\-cpp\fR option had been specified. 
+Use the \fB\-fcoco\fR option to run the ISO/IEC 1539-3 preprocessor,
+or the \fB\-ftpp\fR option to
+run the traditional Fortran preprocessor. See the flags for more details.
+.PP 
+Some \fBpathf95\fR(1) command options, for example, \%\fB\-LIST\fR,
+\%\fB\-LNO\fR, \%\fB\-OPT\fR, \%\fB\-TARG\fR, and
+\%\fB\-TENV\fR, accept several suboptions and allow you to
+specify a setting for each argument.  To specify multiple suboptions,
+either use colons to separate each suboption or specify multiple
+options on the command line.  For example, the following command lines
+are equivalent:
+.nf 
+.in +5n
+\fC
+pathf95 \-LIST:notes=ON:options=OFF b.f
+pathf95 \-LIST:notes=ON \-LIST:options=OFF b.f
+\fR
+.in
+.fi 
+.PP 
+Some suboptions to options of this type are specified with a setting
+that will either enable or disable the feature.  To enable a feature,
+specify the suboption either alone or with \fB=1\fR, \fB=ON\fR,
+or \fB=TRUE\fR.  To
+disable a feature, specify the suboption with
+either \fB=0\fR, \fB=OFF\fR, or \fB=FALSE\fR.  For
+example, the following command lines are equivalent:
+.nf 
+.in +5n
+\fC
+pathf95 \-LNO:auto_dist:blocking=OFF:oinvar=FALSE a.f
+pathf95 \-LNO:auto_dist=1:blocking=0:oinvar=OFF a.f
+\fR
+.in
+.fi 
+.PP 
+For brevity, this man page shows only the \fBON\fR or \fBOFF\fR
+settings to suboptions, but
+the compiler also accepts \fB0\fR, \fB1\fR, \fBTRUE\fR,
+and \fBFALSE\fR as
+settings.
+.PP 
+The \fBpathf95\fR command accepts the following options:
+.TP 10
+\fB\-###\fR
+Like -v, only nothing is run and args are quoted.
+.TP
+\fB\-ansi\fR
+Generate messages about constructs which violate standard Fortran
+syntax rules and constraints, plus messages about obsolescent and deleted
+features. This also disables all nonstandard
+intrinsic functions and subroutines, and implies \fB\-ffortran2003\fR.
+Specifying \fB\-ansi\fR in conjunction
+with \fB\-fullwarn\fR
+causes all messages, regardless of level, to be generated.
+.TP
+\fB\-ar\fR
+Create an archive (instead of a shared object or executable) using \fBar\fR.
+'\"
+'\" auto_use
+'\"
+.TP 
+\fB\-auto-use\fI\ module_name\fR[\fB,\fImodule_name\fR]\ \&.\|.\|.
+Direct the compiler to behave as if a
+\fBUSE\fR \fImodule_name\fR
+statement were entered in your Fortran source code for each
+\fImodule_name\fR.
+The \fBUSE\fR statements are entered in
+every program unit and interface body in the
+source file being compiled (for example, 
+\fBpathf95 \-auto-use mpi_interface\fR or
+\fBpathf95 \-auto-use shmem_interface\fR).
+Using this option can add compiler time in some situations.
+.TP
+\fB\-backslash\fR
+Treat a backslash as a normal character rather than as an escape
+character. When this option is used, the preprocessor will not be
+called.
+.TP
+\fB\-byteswapio\fR
+Swap bytes during I/O so that unformatted files on a little-endian processor
+are read and written in big-endian format (or vice versa.) In sequential
+unformatted files, this affects record headers as well as data. To be
+effective, the option must be used
+when compiling the Fortran main program. Setting the environment
+variable FILENV when running the program will override the compiled-in
+choice in favor of the choice established by the command \fBassign\fR(1).
+'\"
+'\" c
+'\"
+.TP 
+\%\fB\-c\fR
+Disable the load step and write the binary object file to
+\fIfile\fB.o\fR.
+'\"
+'\" check_bounds
+'\"
+.TP
+\fB\-C\fR
+Check subscript range at run time and print
+warnings; if environment variable \fBF90_BOUNDS_CHECK_ABORT\fR is set to
+\fBYES\fR, also force the program to abort. Subscript range violations print
+warnings at compile time regardless of \fB-C\fR; setting F90_BOUND_CHECK_ABORT
+turns those warnings into errors.
+This option also checks substrings and null pointer accesses.
+.TP
+\fB\-CG\fR
+Option group to control code generation. See the \fBeko\fR(7) man page.
+'\"
+'\" col
+'\"
+.TP 
+\fB\-col\fIN\fR
+Specify the line width for \%fixed\-format source lines.  Specify
+\fB72\fR, \fB80\fR, or \fB120\fR for \fIN\fR (-col72, -col80, or
+-col120).  By default, \%fixed\-format lines are 72 characters wide.
+Specifying \fB\-col120\fR implies \fB\-extend-source\fR and
+recognizes lines up to 132 characters wide.  For more information on
+specifying line length, see the \fB\-extend-source\fR and
+\fB\-noextend-source\fR options.
+.TP
+\fB\-convert\fI conversion\fR
+Control the swapping of
+bytes during I/O so that unformatted files on a little-endian processor
+are read and written in big-endian format (or vice versa.) In sequential
+unformatted files, this affects record headers as well as data. To be
+effective, the option must be used
+when compiling the Fortran main program. Setting the environment
+variable FILENV when running the program will override the compiled-in
+choice in favor of the choice established by the command \fBassign\fR(1).
+Legal values of
+\fIconversion\fR are:
+.RS
+.TP 4
+\fBnative\fR
+No conversion (the default)
+.TP
+\fBbig_endian\fR 
+Files are big-endian
+.TP
+\fBlittle_endian\fR 
+Files are little-endian
+.RE
+.TP
+\fB\-copyright\fR
+Show the copyright for the compiler being used.
+'\"
+'\" cpp
+'\"
+.TP 
+\%\fB\-cpp\fR
+Preprocess all Fortran input source files with
+the C preprocessor \fBcpp\fR(1)
+before compiling. This preprocessor
+automatically expands macros outside of preprocessor statements.
+.IP 
+The default is to run the C preprocessor if the input file ends
+in a \&\fB.F\fR, \&\fB.F90\fR or \&\fB.F95\fR suffix, but not to
+preprocess files ending in \&\fB.f\fR, \&\fB.f90\fR, or \&\fB.f95\fR.
+.IP 
+For more information on controlling preprocessing,
+see the \%\fB\-fcoco\fR,
+\%\fB\-ftpp\fR, \%\fB\-E\fR, \%\fB\-macro-expand\fR,
+and \%\fB\-nocpp\fR options.
+.TP
+\fB\-d-lines\fR
+Compile lines with a D in column 1.
+'\"
+'\" D
+'\"
+.TP 10
+\%\fB\-D\fIvar\fB=\fR[\fIdef\fR][\fB,\fIvar\fB=\fR[\fIdef\fR]\ \&.\|.\|.]
+Define variables used for source preprocessing as if they had been
+defined by a \fB#define\fR directive.
+If no \fIdef\fR is specified,
+\fB1\fR is used.
+For information on undefining variables, see the \%\fB\-U\fIvar\fR
+option.
+'\"
+'\" default64
+'\"
+.TP 10
+\%\fB\-default64\fR
+Set the sizes of default integer, real, logical, and double precision
+objects.
+This option is a synonym for the pair of options:
+\%\fB\-r8\fR \%\fB\-i8\fR.
+Calling a routine in a specialized library, 
+such as SCSL, requires that
+its 64\-bit entry point be specified when 
+64\-bit data are used. Similarly,
+its 32\-bit entry point must be specified when 32\-bit 
+data are used.
+.TP
+\fB\-dumpversion\fR
+Show the version of the compiler being used and nothing else.
+'\"
+'\" E
+'\"
+.TP 10
+\%\fB\-E\fR
+Run only the source preprocessor files, without considering
+suffixes, and write the result to \fBstdout\fR.
+This option overrides the \%\fB\-nocpp\fR option.
+The output file contains line directives.
+To generate an output file without line directives,
+see the \%\fB\-P\fR option.
+For more information on controlling source preprocessing,
+see the \%\fB\-fcoco\fR,
+\%\fB\-cpp\fR, \%\fB\-ftpp\fR, \%\fB\-macro-expand\fR,
+and \%\fB\-nocpp\fR options.
+'\" 
+'\" extend_source
+'\"
+.TP 
+\%\fB\-extend-source\fR
+Specify a \%132\-character line length for \%fixed\-format source lines.
+By default, \%fixed\-format lines are 72 characters wide.
+For more information on controlling line length, see
+the \%\fB\-col\fIn\fR option.
+.\" -- -fb-create
+.\" ---------------------------------
+.TP 
+\%\fB\-fb-create\fI\ path\fR
+Used to specify that an instrumented executable program is to be generated.
+Such an executable is suitable for producing feedback data files with the
+specified prefix for use in feedback-directed compilation (FDO). The commonly
+used prefix is <\fIfbdata\fR>. This is \fBOFF\fR by default. 
+.\" ---------------------------------
+'\"
+'\" fb_opt
+'\"
+.TP 
+\%\fB\-fb-opt\fI\ path\fR
+Specify the directory that contains the instrumentation output
+generated by compiling with \%\fB\-fb-create\fR and then run your
+program with a training input set. Directs the compiler to
+use this information to better optimize the program. When the
+\%\fB\-c\fR option is used to produce an object file that is eventually
+linked to form an instrumented executable, the \%\fB\-fb-opt\fR option
+should also be specified.
+.TP 
+\%\fB\-fcoco\fR[\fB=\fIsetfile\fR]\fR 
+Run the ISO/IEC 1539-3 conditional compilation preprocessor on input
+Fortran source files before compiling.
+This overrides the default
+whereby files suffixed with \&\fB.F\fR,
+\&\fB.F90\fR, or \&\fB.F95\fR are preprocessed with cpp
+but files suffixed with \&\fB.f\fR, \&\fB.f90\fR or
+\&\fB.f95\fR are not preprocessed.
+.IP
+If no \fIsetfile\fR is specified, the preprocessor looks for
+\fIcoco.set\fR in the current working directory.
+Any \fB\-I\fR flags are passed to the preprocessor, and take precedence
+over the setfile.
+.IP
+Any \fB\-D\fR flags are passed to the preprocessor to assign values
+to constants, overriding values assigned within the source files. If
+the flag contains "=", the value on the right side
+must be an integer, and the name on the left side must be declared
+as an integer constant within the source files. Otherwise, the name must be
+declared as a logical constant within the source files, and will be set true.
+Constants defined by \fB-D\fR should not be defined in the \fIsetfile\fR.
+.TP 
+\%\fB\-fdecorate\fI\ path\fR 
+Specify how to "decorate" external Fortran identifiers to generate
+linker symbols. Ordinarily we apply the rules established by options
+\%\fB\-f[no-]underscoring\fR
+and
+\%\fB\-f[no-]second-underscore\fR, but
+\%\fB\-fdecorate\fR overrides those rules
+for specific identifiers. The file \fIpath\fR should contain two
+blank- or tab-delimited tokens per line. The first token is a Fortran
+identifier and the second is the linker symbol to use for that identifier.
+An abbreviation is allowed in place of the second token: "0"
+says to append no underscore to the Fortran identifier, "1" says to
+append a single underscore, and "2" says to append two underscores
+if the Fortran identifier contains an underscore but otherwise to append
+one.
+If an identifier appears twice, the second rule overrides the first.
+.IP
+You may repeat this option to specify multiple files.
+.TP 
+\%\fB\-ff2c-abi\fI\ path\fR 
+Use the GNU \fBf2c\fR ABI when calling any functions listed in the
+file at \fIpath\fR.  On the x86_64 platform, the \fBg77\fR compiler
+generates code that does not follow the documented platform ABI in
+some cases (involving functions returning complex or single-precision
+real values).  You must use this flag if you are mixing code generated
+by \fBg77\fR with code generated by the PathScale Fortran compiler.
+.IP
+The format of an \fBf2c\fR ABI description file is simply a list of
+Fortran function names, one per line, without any of the trailing
+underscores that are added in object files.  To generate files in this
+format, you can use the \fBfsymlist\fR(1) utility.
+.TP
+\fB\-ffortran2003\fR
+When you apply the Fortran intrinsic real, dble, or cmplx to a boz constant such
+as \fBz'3ff00000'\fR, the compiler traditionally converts the constant to an
+integer and returns the real value whose magnitude matches that integer.
+This option makes each intrinsic behave as Fortran 2003 requires, returning
+the real value whose bit pattern matches the boz constant.
+.TP
+\fB\-ffortran-bounds-check\fR
+See \fB-C\fR.
+'\"
+'\" fixedform
+'\"
+.TP 
+\fB\-fixedform\fR
+Treat all input source files, regardless of suffix, as if they were
+written in fixed source form (f77 72-column format), instead of F90
+free format. By default, only input files suffixed with \fB.f\fR or
+\%\fB.F\fR are assumed to be written in fixed source form.
+'\"
+'\" flist
+'\"
+.TP 
+\%\fB\-flist\fR
+Invoke all Fortran listing control options.  The effect
+is the same as if all \%\fB\-FLIST\fR options are enabled.
+'\"
+'\" FLIST
+'\"
+.TP 
+\%\fB\-FLIST:\fR\ \&.\|.\|.
+Invoke the Fortran listing control group, which controls production
+of the compiler's internal program representation back into Fortran
+code, after IPA inlining and \%loop\-nest transformations. This is
+used primarily as a diagnostic tool, and the generated Fortran code
+may not always compile.  With the exception of \%\fB\-FLIST:=OFF\fR,
+any use of this option implies \%\fB\-flist\fR. 
+The arguments to the \%\fB\-FLIST\fR option
+are as follows:
+.RS 10
+.TP 15
+\fBArgument\fR
+\fBAction\fR
+.TP 
+\fB=\fIsetting\fR
+Enable or disable the listing.  \fIsetting\fR can be either \fBON\fR
+or \fBOFF\fR. The default is \fBOFF\fR.
+.sp
+This option is enabled when any other \%\fB\-FLIST\fR options are
+enabled, but it can also be used to enable a listing when no
+other options are enabled.
+.TP 
+\fBansi_format=\fIsetting\fR
+Set ANSI format. \fIsetting\fR can be either \fBON\fR or \fBOFF\fR.
+When set to \fBON\fR, the compiler uses a space (instead of tab) for
+indentation and a maximum of 72 characters per line. The default is
+\fBOFF\fR.
+.TP 
+\fBemit_pfetch=\fIsetting\fR
+Write prefetch information, as comments, in the transformed source
+file. \fIsetting\fR can be either \fBON\fR or \fBOFF\fR. The default
+is \fBOFF\fR.
+.IP 
+In the listing, \fBPREFETCH\fR identifies a prefetch and includes the
+variable reference (with an offset in bytes), an indication of
+read/write, a stride for each dimension, and a number in the range
+from 1 (low) to 3 (high), which reflects the confidence in the
+prefetch analysis.  prefetch identifies the reference(s) being
+prefetched by the \fBPREFETCH\fR descriptor.  The comments occur after
+a read/write to a variable and note the identifier of the
+PREFETCH\-spec for each level of the cache.
+.TP 
+\fBftn_file=\fIfile\fR
+Write the program to \fIfile\fR.
+By default, the program is written to \fIfile\fB.w2f.f\fR.
+.TP 
+\fBlinelength=\fIn\fR
+Set the maximum line length to \fIn\fR characters.
+.TP 
+\fBshow=\fIsetting\fR
+Write the input and output filenames to \fBstderr\fR.
+\fIsetting\fR can be either \fBON\fR or \fBOFF\fR.
+The default is \fBON\fR.
+.RE
+.TP
+\fB\-f[no\-]directives \fR
+\fB\-fno-directives\fR ignores all
+directives (such as "!$OMP" or "C*$* PREFETCH_REF") inside
+comments. The default is \fB\-fdirectives\fR, which scans the
+comments for directives (although certain directives may have no effect
+unless additional options, such as \fB\-mp\fR, are present.)
+.TP
+\fB\-f[no\-]math\-errno \fR
+Do not set ERRNO after calling math functions that are executed with a
+single instruction, e.g. \fBsqrt\fR. A program that relies on IEEE
+exceptions for math error handling may want to use this flag for speed
+while maintaining IEEE arithmetic compatibility. This is implied by
+\fB\-Ofast\fR. The default is \fB\-fmath-errno\fR.
+.TP
+\fB\-f[no\-]preprocessed\fR
+\fB\-fpreprocessed\fR tells the preprocessor that input has already
+been preprocessed. Using \fB\-fno\-preprocessed\fR tells preprocessor
+that input has not already been preprocessed.
+.TP
+\fB\-f[no-]second-underscore\fR
+If \fB\-funderscoring\fR is in effect, and the original Fortran external
+identifier contained an underscore,
+\fB\-fsecond-underscore\fR appends a second underscore to the one added
+by .
+\fB\-funderscoring\fR.
+\fB\-fno\-second-underscore\fR does not append a second underscore.
+The
+default is both
+\%\fB\-funderscoring\fR and
+\%\fB\-fsecond-underscore\fR.
+See also \fB\-fdecorate\fR.
+.TP
+\fB\-f[no-]underscoring\fR
+\fB\-funderscoring\fR appends an underscore to each external Fortran
+identifier to generate a linker
+symbol. \fB\-fno-underscoring\fR appends no
+underscores.
+The
+default is both
+\%\fB\-funderscoring\fR and
+\%\fB\-fsecond-underscore\fR.
+See also \fB\-fdecorate\fR.
+.TP
+\fB\-f[no-]unsafe-math-optimizations\fR 
+\fB\-funsafe-math-optimizations\fR improves FP speed by violating ANSI
+and IEEE rules. \fB\-fno-unsafe-math-optimizations\fR makes the
+compilation conform to ANSI and IEEE math rules at the expense of
+speed.
+.TP
+\fB\-fPIC\fR
+Generate position independent code, if possible. It is \fBOFF\fR by default.
+'\"
+'\" freeform
+'\"
+.TP 10
+\%\fB\-freeform\fR
+Treat all input source files, regardless of suffix,
+as if they were written in free source
+form.
+By default, only input files suffixed with \&\fB.f90\fR, \&\fB.F90\fR,
+\&\fB.f95\fR, or \&\fB.F95\fR are assumed to be written in free source form.
+'\" -ftest-coverage
+'\" from gcc man pages
+.TP
+\fB\-ftest-coverage \fR
+Create data files for the \fBpathcov\fR(1) code-coverage utility. The
+data file names begin with the name of your source file:
+.RS
+.TP
+\fBSOURCENAME.bb \fR
+A mapping from basic blocks to line numbers, which \fBpathcov\fR uses to
+associate basic block execution counts with line numbers.
+.TP
+\fBSOURCENAME.bbg\fR
+A list of all arcs in the program flow graph. This allows \fBpathcov\fR to
+reconstruct the program flow graph, so that it can compute all basic
+block and arc execution counts from the information in the
+\fBSOURCENAME.da\fR file.
+.RE
+.IP
+Use \fB\-ftest-coverage\fR with \fB\-fprofile-arcs\fR; the latter option adds
+instrumentation to the program, which then writes execution counts to
+another data file:
+.RS
+.TP
+\fBSOURCENAME.da \fR
+Runtime arc execution counts, used in conjunction with the arc
+information in the file \fBSOURCENAME.bbg\fR.
+.sp
+Coverage data will map better to the source files if
+\fB\-ftest-coverage\fR is used without optimization. See the gcc man pages 
+for more information.
+.RE
+'\"
+'\" ftpp
+'\"
+.TP 
+\%\fB\-ftpp\fR 
+Run the traditional Fortran source preprocessor on input Fortran source files
+before compiling.
+This overrides the default
+whereby files suffixed with \&\fB.F\fR,
+\&\fB.F90\fR, or \&\fB.F95\fR are preprocessed with cpp
+but files suffixed with \&\fB.f\fR, \&\fB.f90\fR or
+\&\fB.f95\fR are not preprocessed.
+.IP 
+This preprocessor does not expand macros
+outside of preprocessor statements unless you also
+specify \%\fB\-macro-expand\fR.
+'\"
+'\" fullwarn
+'\"
+.TP 
+\%\fB\-fullwarn\fR
+Request that the compiler generate \%comment\-level messages.  These
+messages are suppressed by default. Specifying this option can be
+useful during software development.
+'\"
+'\" -g [n]
+'\"
+.TP 
+\fB\-g\fR[\fIN\fR] 
+Specify debugging support and to indicate the level of information
+produced by the compiler. The supported values for \fBN\fR are:
+.RS
+.TP 4
+\fB0\fR
+No debugging information for symbolic debugging is produced. This is
+the default.
+.TP
+\fB1\fR 
+Produces minimal information, enough for making backtraces in parts of the
+program that you don't plan to debug.  This is also the flag to use if
+the user wants backtraces but does not want the overhead of full debug
+information. This flag also causes \fB\-\-export\-dynamic\fR to be passed
+to the linker.
+.TP
+\fB2\fR 
+Produce additional debugging information for symbolic
+debugging. Specifying \fB\-g\fR without a debug level is equivalent to
+specifying \fB\-g2\fR.  If there is no explicit optimization flag
+specified, the \fB\-O0\fR optimization level is used in order to
+maintain the accuracy of the debugging information.  If optimization
+options \fB\-O1\fR, \fB\-O2\fR, or \fB\-O3\fR are
+explicitly specified, the optimizations are performed accordingly but
+the accuracy of the debugging cannot be guaranteed. If \fB\-ipa\fR is
+specified along with option \fB\-g2\fR, then IPA is disabled.
+.RE
+'\"
+'\" -G
+'\"
+.TP
+\fB\-G\fR[\fIN\fR]
+(For MIPS only)
+Assigns global and static objects of size \fIN\fR bytes or less into the
+small data or bss sections \fB.sdata\fR and \fB.sbss\fR instead of the
+normal data or bss sections.  Data in these sections is retrieved more
+quickly using gp-relative addressing.
+.IP
+The default value of \fIN\fR is 8.
+If more than 64K bytes are assigned to small data sections, the linker
+will report an error, and you will need to use a smaller value
+\fB\-G0\fR or \fB\-G4\R.
+.TP
+\fB\-GRA:\fR
+Option group to control global register allocation.
+'\"
+'\" help
+'\"
+.TP
+\%\fB\-help\fR
+List all available options.  The compiler is not invoked.
+.TP
+\fB\-help:\fR
+Print list of possible options that contain a given string.
+'\"
+'\" i
+'\"
+.TP 
+\%\fB\-i\fIn\fR
+Specify the length of default integer constants, default integer
+variables, and logical quantities.
+Specify one of the following:
+.RS 10
+.TP 10
+\fBOption\fR
+\fBAction\fR
+.TP 
+\%\fB\-i4\fR
+Specifies \%32\-bit (4 \%byte\-) objects.  Default.
+.TP 
+\%\fB\-i8\fR
+Specifies \%64\-bit (8 \%byte\-) objects.
+.RE
+'\"
+'\" I
+'\"
+.TP 10
+\%\fB\-I\fIdir\fR
+Specify a directory in which to search for "include" and "use" files.
+This is used for the following types of files:
+.RE
+.RS 10
+.IP \(bu 4
+Files named in \fBINCLUDE\fR
+lines in the Fortran source file that do not begin with a
+slash (\fB/\fR) character
+.IP \(bu 4
+Files named in \fB#include\fR source preprocessing directives that do not
+begin with a slash (\fB/\fR) character
+.IP \(bu 4
+Files specified in \fBUSE\fR statements
+.RE
+.RS 10
+.PP 
+The search for "include" files takes place in this order:
+first, in the same directory as the file containing the \fBINCLUDE\fR or
+\fB#include\fR;
+second, in the directories specified by
+\fB\-I\fIdir\fR; and third, in the standard directory, \fB/usr/include\fR.
+.PP
+The search for "use" files takes place in this order:
+first, in the current working directory;
+second, in the directory specified by the \fB\-module\fR option if that option
+was used; and third, in the directories specified by
+\fB\-I\fIdir\fR.
+.RE
+'\"
+'\" ignore_suffix
+'\"
+.TP
+\%\fB\-ignore-suffix\fR
+Compile all files as if they were Fortran source files.  By default,
+the \fBpathf95\fR(1) command determines the type of processing
+necessary for an input file based on its suffix.  Files that end in
+\&\fB.c\fR, for example, are compiled by \fBpathcc\fR(1).  When
+\%\fB\-ignore-suffix\fR is specified, the compiler processes all files
+named as if they were all Fortran source files, regardless of suffix.
+.TP 
+\%\fB\-[no-]intrinsic=\fIname\fR
+Add a procedure to (or remove a procedure from) the set of intrinsic
+functions and subroutines that the compiler recognizes. By default,
+the compiler recognizes only some of the intrinsics that it can
+support.
+.RS 10
+.PP
+The \fIname\fR can be the lower-case name of any intrinsic that the compiler
+can support, or it can be an upper-case name representing a predefined "family"
+of intrinsics.
+You can use the options to "tune" the compiler to provide all the
+intrinsics a program needs, while eliminating the ones whose names
+conflict with those of the program's own functions and subroutines.
+The options may appear multiple times, and will be interpreted
+in order. For example,
+"-no-intrinsic=EVERY -intrinsic=G77 -no-intrinsic=abort" would
+remove all intrinsics, then add the family of G77
+intrinsics, and then remove the individual intrinsic "abort".
+.PP
+Predefined families are:
+.TP
+\%\fBEVERY\fR
+Every intrinsic that the pathf95 compiler can support
+.TP
+\%\fBANSI\fR
+Intrinsics defined in the ANSI standard; this is the default for
+the \fB\-ansi\fR option.
+.TP
+\%\fBG77\fR
+Intrinsics known to the GNU compiler
+.TP
+\%\fBPGI\fR
+Intrinsics known to the PGI(TM) compiler
+.TP
+\%\fBOMP\fR
+Intrinsics defined by the OpenMP standard (automatically enabled by
+the -mp option; see the \fBeko\fR(7) man page for more information)
+.TP
+\%\fBTRADITIONAL\fR
+Intrinsics known to pathf95 prior to version 2.0; this is the
+default in the absence of the \fB\-ansi\fR option.
+.PP
+A family like "PGI" contains intrinsics supported by both pathf95 and the PGI
+compiler; that does not imply that pathf95 supports every intrinsic in the
+PGI compiler.
+.RE
+'\"
+'\" ipa
+'\"
+.TP 
+\%\fB\-ipa\fR
+Invoke inter\-procedural analysis (IPA). Specifying this option is
+identical to specifying \%\fB\-IPA\fR or \%\fB\-IPA:\fR. Default
+settings for the individual IPA suboptions are used.
+'\"
+'\" IPA
+'\"
+.TP 
+\%\fB\-IPA\fR[:\fR\ \&.\|.\|.\fR]
+Control the application of inter\-procedural analysis (IPA) and
+optimization.  This includes inlining, common block array padding,
+constant propagation, dead function elimination, alias analysis, and
+other features.  Specify \%\fB\-IPA\fR with no arguments to invoke the
+inter\-procedural analysis phase with default options.
+.sp
+If you have included IPA directives in your source code, the
+\%\fB\-IPA\fR option must be specified in order for those
+directives to be honored.
+.sp
+If you compile and load in distinct steps, you must use at least
+\%\fB\-IPA\fR for the compile step, and you must specify \%\fB\-IPA\fR
+and the individual options in the group for the load step.  For more
+information on the individual options in this group, see \fBipa\fR in
+the \fBeko\fR(7) man page for more information.
+.\" ---------------------------------
+.\" -- -isystem dir
+.TP
+\fB\-isystem dir\fR
+When the cpp preprocessor is in use, this option
+searches \fIdir\fR for header files, after all directories specified by
+\fB\-I\fR but before the standard system directories. It also marks
+\fIdir\fR as a
+system directory, so that it gets the same special treatment as is
+applied to the standard system directories.
+With respect to Fortran itself, this option
+searches \fIdir\fR for modules, after all directories specified by
+\fB\-I\fR but before any directories containing modules intrinsic to
+Fortran.
+'\"
+'\" keep
+'\"
+.TP 
+\%\fB\-keep\fR
+Write all intermediate compilation files. \fIfile\fB.s\fR contains
+the generated assembly language code. \fIfile\fB.i\fR contains the
+preprocessed source code. These files are retained after compilation
+is finished. If IPA is in effect and you want to retain
+\fIfile\fB.s\fR, you must specify \fB\-IPA:keeplight=OFF\fR in
+addition to \fB\-keep\fR.
+.TP
+\fB\-keepdollar\fR
+Treat the dollar sign ($) as a normal last character in symbol names.
+'\"
+'\" l
+'\"
+.TP 10
+\%\fB\-l\fIlibrary\fR
+Search the library named \fBlib\fIlibrary\fB.a\fR or
+\fBlib\fIlibrary\fB.so\fR.  The loader searches libraries in the order
+you specify.
+'\"
+'\" L
+'\"
+.TP 
+\%\fB\-L\fIdirectory\fR
+Change the library search algorithm for the loader. For
+\fIdirectory\fR, specify the path to a directory that should be
+searched before using the default system libraries. You can specify
+multiple \%\fB\-L\fR options on the command line. The library search
+algorithm searches these directories in left to right order.
+'\"
+'\" LANG
+'\"
+.TP 
+\%\fB\-LANG:\fR\ \&.\|.\|.
+Controls the language option group.
+The following sections describe the suboptions available in this group.
+.RS 10
+.TP 15
+\fBArgument\fR
+\fBAction\fR
+.TP 
+\fBheap_allocation_threshold=\fIsize\fR
+Determine heap or stack allocation.
+If the size of an automatic array or compiler temporary
+exceeds \fIsize\fR bytes it
+is allocated on the heap instead of the stack.  If \fIsize\fR
+is \%\fB\-1\fR,
+objects are always put on the stack.  If \fIsize\fR is \fB0\fR,
+objects are always put on the heap.
+.sp
+The default is \%\fB\-1\fR for maximum performance and for compatibility
+with previous releases.
+.TP 
+\fBIEEE_minus_zero=\fIsetting\fR
+Enable or disable the \fBSIGN\fR(3I) intrinsic function's ability to
+recognize negative \%floating\-point zero (\fB\-0.0\fR). Specify
+either \fBON\fR or \fBOFF\fR for \fIsetting\fR.  The default is
+\fBOFF\fR, which suppresses the minus sign. The minus sign is
+suppressed by default to prevent problems from hardware instructions
+and optimizations that can return a \%\fB\-0.0\fR result from a
+\fB0.0\fR value. To obtain a minus sign (\fB\-\fR) when printing a
+negative \%floating\-point zero \%(\fB\-0.0\fR), use the \%\fB\-z\fR
+option on the \fBassign\fR(1) command.
+.TP 
+\fBIEEE_save=\fIsetting\fR
+The Fortran standard requires that any procedure which accesses the
+standard IEEE intrinsic modules via a "use" statement
+must save the floating point flags, halting
+mode, and rounding mode on entry; must restore the halting mode and rounding
+mode
+on exit; and must OR the saved flags with the current flags on exit. Setting
+this option \fBOFF\fR may improve execution speed by skipping these steps.
+.TP 
+\fBrecursive=\fIsetting\fR
+Invoke the language option control group to control recursion support.
+\fIsetting\fR can be either \fBON\fR or \fBOFF\fR.  The default is
+\fBOFF\fR.
+.sp
+In either mode, the compiler supports a recursive, \%stack\-based
+calling sequence. The difference lies in the optimization of
+statically allocated local variables, as described in the following
+paragraphs.
+.sp
+With \%\fB\-LANG:recursive=ON\fR, the compiler assumes that a
+statically allocated local variable could be referenced or modified by
+a recursive procedure call.  Therefore, such a variable must be stored
+into memory before making a call and reloaded afterwards.
+.sp
+With \%\fB\-LANG:recursive=OFF\fR, the compiler can safely assume that
+a statically allocated local variable is not referenced or modified by
+a procedure call. This setting enables the compiler to optimize more
+aggressively.
+.RE
+.TP 
+'\"
+'\" LNO
+'\"
+.TP 
+\%\fB\-LNO:\fR\ \&.\|.\|.
+Specify options and transformations performed on loop nests by the
+Loop Nest Optimizer (LNO). The \%\fB\-LNO\fR options are enabled only
+if \%\fB\-O3\fR is also specified on the \fBpathf95\fR(1) command
+line.
+.IP 
+For information on the individual options in this group, see 
+\fBeko\fR(7) man page. For information on the LNO options that are in effect
+during a compilation, use the \%\fB\-LIST:all_options=ON\fR option.
+.TP
+\fB\-m32\fR
+(For x86 only) Compile for 32-bit ABI, also known as x86 or IA32.
+.TP
+\fB\-m64\fR
+(For x86 only) Compile for 64-bit ABI, also known as AMD64, x86_64, or IA32e.
+.TP
+\fB\-n32\fR
+(For MIPS only) Same as \fB\-mabi=n32\fR
+.TP
+\fB\-64\fR
+(For MIPS only) Same as \fB\-mabi=64\fR
+.TP
+\fB\-mabi=(n32|64)\fR
+(For MIPS only) Compiler will generate code for the selected ABI.
+\fB\-mabi=n32\fR will compile for 32-bit ABI.
+\fB\-mabi=64\fR will compile for 64-bit ABI, also known as n64.
+The default ABI is 64-bit.
+'\"
+'\" macro_expand
+'\"
+.TP 10
+\%\fB\-macro-expand\fR
+Enable macro expansion throughout each file in source files
+preprocessed with the Fortran preprocessor. For this flag to have any
+effect, you must explicitly enable the use of the Fortran preprocessor
+using the \fB\-ftpp\fR flag (the default preprocessor is the C
+preprocessor). Without this option specified, macro expansion is
+limited to preprocessor \fB#\fR directives in files processed by the
+Fortran preprocessor. When this option is specified, macro expansion
+occurs throughout the source file.
+.TP
+\fB\-march=<cpu-type>\fR
+(For x86) Compiler will optimize code for the selected cpu type:
+\fBopteron, athlon, athlon64, athlon64fx, barcelona, em64t, pentium4, xeon, core, wolfdale, anyx86,
+auto\fR.  \fBauto\fR means to optimize for the platform that the compiler is
+running on, which the compiler determines by reading /proc/cpuinfo.
+\fBanyx86\fR means a generic x86 processor.  Under 32-bit ABI, anyx86 is a
+processor without SSE2/SSE3/3DNow!\ support; under 64-bit ABI it is a processor
+with SSE2 but without SSE3/3DNow!.  \fBCore\fR refers to the Intel Core
+Microarchitecture, used by 64-bit CPUs such as Woodcrest.  The default is
+\fBauto\fR.
+.IP
+(For MIPS) Compiler will optimize code for the selected CPU type:
+\fBice9\fR (aka \fB5kf\fR or \fBmips5kf\fR), \fBtwc9a\fR, or \fBauto\fR.
+\fBauto\fR means to optimize for the platform that the compiler is
+running on, which the compiler determines by reading /proc/cpuinfo.
+(Warning: \fBauto\fR is invalid on the cross compiler.)
+The default is \fBmips5kf\fR.
+.TP
+\fB\-mcmodel=(small|medium)\fR
+(For x86 only)
+Select the code size model to use when generating offsets within
+object files. Most programs will work with \fB\-mcmodel=small\fR
+(using 32\-bit data relocations), but some need \fB\-mcmodel=medium\fR
+(using 32\-bit relocations for code and 64\-bit relocations for data).
+.TP
+\fB\-mcpu=<cpu-type>\fR
+Behaves like \fB-march\fR.  See \fB-march\fR.
+.\" ---------------------------------
+.\" -- -mno-sse2
+.TP
+\fB\-mno-sse2\fR
+(For x86 only)
+This flag is only applicable to -m32. \fB\-mno-sse2\fR is ignored
+under \fB\-m64\fR with a warning.
+.TP
+\%\fB\-module \fIdir\fR
+Create the ".mod" file corresponding to a "module" statement in the directory
+\fIdir\fR instead of the current working directory. Also, when searching for
+modules named in "use" statements, examine the directory \fIdir\fR
+before the directories established by \fB-I\fIdir\fR options.
+.TP
+\fB\-msse2\fR
+(For x86 only)
+Enable use of SSE2 instructions. This is the default under both
+\fB\-m64\fR and \fB\-m32\fR.
+.TP
+\fB\-msse3\fR
+(For x86 only)
+Enable use of SSE3 instructions.  Default is \fBON\fR under \fB\-march=barcelona\fR, \fB\-march=em64t\fR,
+\fB\-march=wolfdale\fR and \fB\-march=core\fR.  Otherwise, it is \fBOFF\fR by default.
+.TP
+\fB\-msse4a\fR
+(For x86 only) Enable use of SSE4A instructions.  Default is \fBOFF\fR. 
+.TP
+\fB\-mtune=<cpu-type>\fR
+Behaves like \fB-march\fR.  See \fB-march\fR.
+'\"
+'\"
+'\" nocpp
+'\"
+.TP 10
+\%\fB\-nocpp\fR
+Disable the source preprocessor.
+.IP 
+See the \%\fB\-fcoco\fR, \%\fB\-cpp\fR, \%\fB\-E\fR, and \%\fB\-ftpp\fR
+options for more
+information on controlling preprocessing.
+.TP
+\fB\-nodefaultlibs\fR
+Do no use standard system libraries when linking.
+'\"
+'\" noextend_source
+'\"
+.TP 
+\%\fB\-noextend-source\fR
+Restrict Fortran source code lines to columns 1 through 72.
+.IP 
+See the \%\fB\-col\fIn\fR and \%\fB\-extend-source\fR options for more
+information on controlling line length.
+.TP
+\fB\-no-pathcc\fR
+\fB\-no\-pathcc\fR turns off the __PATHSCALE__ and other predefined
+preprocessor macros.
+.TP
+\fB\-nostartfiles\fR
+Do not use standard system startup files when linking.
+'\"
+'\" nostdinc
+'\"
+.TP 
+\%\fB\-nostdinc\fR
+Direct the system to skip the standard directory, \fB/usr/include\fR,
+when searching for \fB#include\fR files and files named on
+\fBINCLUDE\fR statements.
+.TP
+\fB\-nostdlib\fR
+No predefined libraries or startfiles.
+'\"
+'\" o
+'\"
+.TP 10
+\fB\-o \fIout_file\fR
+Write the executable file to \fIout_file\fR rather than to
+\fBa.out\fR. By default, the executable output file is written to
+\fBa.out\fR.
+'\"
+'\" O
+'\"
+.TP 
+\fB\-O\fR[\fIn\fR]
+Specify the basic level of optimization desired. \fIn\fR can be one
+of the following:
+.RS
+.TP 
+\fB0\fR
+Turn off all optimizations. 
+.TP 
+\fB1\fR
+Turn on local optimizations that can be done quickly.
+.TP 
+\fB2\fR
+Turn on extensive optimization. This is the default. The
+optimizations at this level are generally conservative, in the sense
+that they are virtually always beneficial, provide improvements
+commensurate to the compile time spent to achieve them, and avoid
+changes which affect such things as floating point accuracy.
+.TP 
+\fB3\fR
+Turn on aggressive optimization. The optimizations at this level are
+distinguished from \%\fB\-O2\fR by their aggressiveness, generally
+seeking highest\-quality generated code even if it requires extensive
+compile time. They may include optimizations that are generally
+beneficial but may hurt performance.
+.IP 
+This includes but is not limited to turning on the Loop Nest
+Optimizer, \fB\-LNO:opt=1\fR, and setting
+\fB\-OPT:ro=1:IEEE_arith=2:Olimit=9000:reorg_common=ON\fR
+.TP
+\fBs\fR
+Specify that code size is to be given priority
+in tradeoffs with execution time.
+.RE
+.IP 
+If no value is specified for \fIn\fR, 2 is assumed.
+.RE
+.PP
+.TP 10
+\fB\-objectlist\fR
+Read the following file to get a list of files to be linked.
+'\"
+'\" -Ofast
+'\"
+.TP 10
+\fB\-Ofast\fR
+Equivalent to \fB-O3 -ipa -OPT:Ofast -fno-math-errno -ffast-math\fR. Use
+optimizations selected to maximize performance.  Although the
+optimizations are generally safe, they may affect floating point
+accuracy due to rearrangement of computations. \fB\-OPT:Ofast\fR effectively
+turns on the following optimizations:
+\fB\-OPT:ro=2:Olimit=0:div_split=on:alias=typed\fR.
+\fB\-OPT:Ofast\fR is also described in the \fBeko\fR(7) man page.
+.sp
+NOTE: \fB\-Ofast\fR enables \fB-ipa\fR (inter\-procedural analysis), which
+places limitations on how libraries and \fB.o\fR files are built. See the
+\fBeko\fR(7) man page for more information.
+.RE
+.PP 
+'\"
+'\" OPT
+'\"
+.TP 10
+\%\fB\-OPT:\fR\ \&.\|.\|.\fR
+Controls miscellaneous optimizations. These options override defaults
+based on the main optimization level. For information on the
+individual options in this group, see the \fBeko\fR(7) man page.
+.RE
+'\"
+'\" P
+'\"
+.TP 10
+\%\fB\-P\fR
+When used with -E, the source preprocessor will not generate \fB#\fR lines in
+the output.
+'\"
+'\" pad_char_literals
+'\"
+.TP 
+\%\fB\-pad-char-literals\fR
+Blank pad all character literal constants that are shorter than the
+size of the default integer type and that are passed as actual
+arguments. The padding extends the length to the size of the default
+integer type.
+.TP
+\fB\-pathcc\fR
+Define __PATHCC__ and other macros.
+'\"
+'\" -pg
+'\" taken from "info gcc"
+.TP
+\fB\-pg\fR
+Generate extra code to profile information suitable for the analysis
+program \fBpathprof\fR(1). You must use this option when compiling the source
+files you want data about, and you must also use it when linking. See
+the gcc man pages for more information.
+'\"
+'\" real_spec
+'\"
+.TP 10
+\%\fB\-r\fIreal_spec\fR
+Specify the default kind specification for real values.
+.RS 10
+.TP 12
+\fBOption\fR
+\fBKind value\fR
+.TP 
+\%\fB\-r4\fR
+Use \fBREAL(KIND=4)\fR and \fBCOMPLEX(KIND=4)\fR for real and complex
+variables, respectively.  Default.
+.TP 
+\%\fB\-r8\fR
+Use \fBREAL(KIND=8)\fR and \fBCOMPLEX(KIND=8)\fR for real and complex
+variables, respectively.
+.RE
+'\"
+'\" S
+'\"
+.TP 10
+\%\fB\-S\fR
+Generate an assembly file, \fIfile\fB.s\fR, rather than an object file
+(\fIfile\fB.o).
+.TP 10
+\fB\-shared\fR
+DSO-shared PIC code.
+.TP
+\fB\-shared-libgcc\fR
+Force the use of the shared libgcc library.
+.TP
+\fB\-show\fR
+Show phases as they are being invoked.
+.TP
+\fB\-show-defaults\fR
+Show the default options in the compiler.defaults file.
+.TP
+\fB\-showO\fR
+Show what phases would be called, but don't invoke anything.
+.TP
+\fB\-showt\fR
+Show time taken by each phase.
+.\"
+.\" --static
+'\"
+.TP
+\fB\--static\fR
+Same as \fB\-static\fR.
+'\"
+'\" static
+'\"
+.TP
+\fB\-static\fR
+Suppress dynamic linking at runtime for shared libraries; uses static
+linking instead.
+.TP 
+\fB\-static\-data\fR
+Statically allocate all local variables. Statically allocated local
+variables are initialized to zero and exist for the life of the
+program. This option can be useful when porting programs from older
+systems in which all variables are statically allocated.
+.IP 
+When compiling with the \fB\-static\-data\fR option, global data
+is allocated as part of the compiled object
+(\fIfile\fB.o\fR) file. The total size of any
+\fIfile\fB.o\fR cannot exceed 2 GB, but the total size of a 
+program loaded from multiple \fB.o\fR files
+can exceed 2 GB. An individual common
+block cannot exceed 2 GB, but you can declare multiple common blocks each
+having that size.
+.IP 
+If a parallel loop in a multi-processed program calls an external
+routine, that external routine cannot be compiled with the
+\fB\-static\-data\fR option. You can mix static and multi-processed object 
+files in the same executable, but a static routine cannot be called 
+from within a parallel region.
+.TP
+\fB\-static-libgcc\fR
+Force the use of the static libgcc library.
+.TP
+\fB\-stdinc\fR
+Predefined include search path list.
+.TP
+\fB\-subverbose\fR 
+Produce diagnostic output about the subscription management for the
+compiler.
+'\"
+'\" TENV
+'\"
+.TP 10
+\%\fB\-TENV:\fR \&.\|.\|.
+Specifies the target environment option group.  These options control
+the target environment assumed and/or produced by the compiler. See
+\fBTENV\fR in the \fBeko\fR(7) man page for details about the
+options that are available.
+'\"
+'\" u
+'\"
+.TP
+\%\fB\-u\fIvar\fR
+Make the default type of a variable undefined, rather than using
+default Fortran 90 rules.
+'\"
+'\" U
+'\"
+.TP 
+\%\fB\-U\fIvar\fR
+Undefine a variable for the source preprocessor. See the
+\%\fB\-D\fIvar\fR option for information on defining variables.
+'\"
+'\" v
+'\"
+.TP 
+\fB\-v\fR
+Print (on standard error output) the commands executed
+to run the stages of compilation. Also print the version
+number of the compiler driver program and of the preprocessor
+and the compiler proper.
+'\"
+'\" version
+'\"
+.TP 
+\%\fB\-version\fR
+Write compiler release version information to \fBstdout\fR.  No input
+file needs to be specified when this option is used.
+'\"
+'\" w
+'\"
+.TP 
+\fB\-w\fR
+Suppress warning messages.
+'\"
+'\" W
+'\"
+.TP 
+\fB\-W\fR\fIc,arg1\fR\fB[,\fR\fIarg2\fR\fB...]\fR
+Pass the argument(s) \fIargi\fR to the compiler pass \fIc\fR where
+\fIc\fR is one of [\fBpfibal\fR].  The \fBc\fR selects the compiler
+pass according to the following table:
+.RS
+.TP 30
+\fBCharacter\fR
+\fBName\fR
+.TP 
+\fBp\fR
+preprocessor
+.TP 
+\fBf\fR
+front-end
+.TP 
+\fBi\fR
+inliner
+.TP 
+\fBb\fR
+backend
+.TP 
+\fBa\fR
+assembler
+.TP 
+\fBl\fR
+loader
+.PP 
+Sets of these phase names can be used to select any combination of phases.
+For example, \%\fB\-Wba,\-o,foo\fR passes the option \%\fB\-o foo\fR
+to the \fBb\fR and \fBa\fR phases.
+.RE
+.TP
+\fB\-Wno-format-nonliteral\fR
+Do not warn if format string is not a string literal. 
+.TP
+\fB\-Wno-larger-than-<number>\fR
+Do not warn if an object is larger than <number> bytes.
+'\"
+'\" woff
+'\"
+.TP 10
+\fB\-woff\fR
+Turn off named warnings
+.TP
+\fB\-woffall\fR
+Turn off all warnings.
+.TP
+\%\fB\-woff\fInum\fR
+Specify message numbers to suppress.
+Examples:
+.RS 10
+.IP \(bu 4
+Specifying \%\fB\-woff2026\fR suppresses message number 2026.
+.IP \(bu 4
+Specifying \%\fB\-woff2026\-2352\fR suppresses messages 2026 through
+2352.
+.IP \(bu 4
+Specifying \%\fB\-woff2026\-2352,2400\-2500\fR suppresses messages 2026
+through 2352 and messages 2400 through 2500.
+.RE
+.RS 10
+.sp
+In the message level indicator, the message numbers appear after the
+dash.
+.RE
+.TP 10
+\fB\-woffoptions\fR
+Turn off warnings about options.
+.TP
+\fB\-Wsign-compare\fR
+Warn about signed/unsigned comparisons.
+'\"
+'\" \-\-
+'\"
+.TP 10
+\fB\-Y\fR\fIc,path\fR
+Set the \fIpath\fR in which to find the associated phase, using the
+same phase names as given in the \%\fB\-W\fR option. The following
+characters can also be specified:
+.RS
+.TP 
+\fBI\fR
+Specifies where to search for include files
+.TP 
+\fBS\fR
+Specifies where to search for startup files (\fBcrt*.o\fR)
+.TP 
+\fBL\fR
+Specifies where to search for libraries
+.RE
+'\"
+'\" file
+'\"
+.TP 
+\%\fIfile\fB.\fIsuffix\fR[\fB90\fR]\ [\fIfile\fB.\fIsuffix\fR[\fB90\fR]]\ \&.\|.\|.
+File or files to be processed, where \fIsuffix\fR is either an
+uppercase \fBF\fR or a lowercase \fBf\fR for source files.
+Files ending in \&\fB.i\fR, \&\fB.o\fR, and \&\fB.s\fR are also accepted.
+The Fortran source files are compiled, and an executable object file
+is produced.
+.sp
+The default name of the executable object file is \fBa.out\fR.  For
+example, the following command line produces \fBa.out\fR:
+.RS 10
+.nf 
+.in +5n
+\fCpathf95 myprog.f\fR
+.in
+.fi 
+.RE
+.IP
+By default, several files are created during processing.  The 
+compiler adds a suffix to the \fIfile\fR portion of the file name and
+places the files it creates into your working directory.  See the
+FILES section for more information on files used and generated.
+'\"
+'\"
+.SH "ENVIRONMENT VARIABLES"
+'\"
+'\"
+For information on environment variables, see the \fBeko\fR(7)
+man page.
+'\"
+.SH "FILES"
+'\"
+The following is a file summary:
+.TP 25
+\fBFile\fR
+\fBType\fR
+.TP 
+\fBa.out\fR
+Executable output file.
+.TP 
+\fIfile\fB.a\fR
+Object file archive.
+.TP 
+\fIfile\fB.B \fR
+Intermediate file written by the front-end of the compiler.
+To retain this file, specify the \%\fB\-keep\fR option.
+.TP 
+\fIfile\fB.f\fR or \fIfile\fB.F\fR
+Input Fortran source file in fixed source form.
+If \fIfile\fR ends in \fB.F\fR, the C preprocessor
+is invoked.
+.TP 
+\fIfile\fB.f90\fR, \fIfile\fB.f95\fR, \fIfile\fB.F90\fR, or \fIfile\fB.F95\fR
+Input Fortran source file in free source form.
+If \fIfile\fR ends in \fB.F90\fR or \fB.F95\fR, the C preprocessor
+is invoked.
+.TP 
+\fIfile\fB.i\fR
+File generated by the source preprocessor.
+To retain this file, specify the \%\fB\-P\fR option.
+.TP 
+\fIfile\fB.mod\fR
+Module file.  Compiling a module generates
+both a module file, which must be available before compiling "use"
+statements that refer to that module, and an object file, which must
+be available when linking the program. When compiling multiple source
+files at once, you must order them so that each module is compiled before
+any "use" statement which refers to that module.
+.TP 
+\fIfile\fB.o\fR
+Object file.
+.TP 
+\fIfile\fB.s\fR
+Assembly language file.
+To retain this file, specify the \%\fB\-S\fR option.
+.TP 
+\fIfile\fB.so\fR
+Dynamic Shared Object (DSO) library.
+.SH "COPYRIGHT"
+Copyright (C) 2007, 2008 PathScale, LLC.  All Rights Reserved.
+.PP
+Copyright (C) 2006, 2007 QLogic Corp.  All Rights Reserved.
+.PP
+Copyright (C) 2003, 2004, 2005, 2006 PathScale, Inc.  All Rights Reserved.
+.PP
+Copyright (C) 2000, 2001 Silicon Graphics, Inc.  All Rights Reserved.
+.SH "SEE ALSO"
+\fBpathcc\fR(1), \fBpathscale_intro\fR(7), \fBeko\fR(7),
+\fBexplain\fR(1), \fBassign\fR(1), \fBfsymlist\fR(1),
+\fBcompiler.defaults\fR(5), \fBpathopt2\fR(1)
+.PP
+PathScale Compiler Suite and Subscription Manager Install Guide
+.PP
+PathScale Compiler Suite User Guide
+.PP
+PathScale Compiler Suite Support Guide
+.PP
+PathScale Debugger User Guide
+.PP
+Online documentation available at http://www.pathscale.com/docs.html

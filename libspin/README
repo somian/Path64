@@ -1,0 +1,92 @@
+# How to use:
+# Do a:
+# #include "gspin-interface.h"
+# NOTE: You may *only* use gspin-interface.h
+# See gspin-test-driver.c as an example.
+
+# How to build libspin.a:
+# Just execute this (README) file.
+# libgspin.a, gspin, gspin-debug get built.
+
+CC=gcc
+
+DEV_HFILES='gspin-gcc-interface.h gspin-wgen-interface.h gspin-tree.h gspin-assert.h gspin-base-types.h gspin-alloc.h gspin-mempool.h gspin-io.h gspin-aux.h gspin-list.h gspin-tel.h'
+DEV_CFILES='gspin-tree.c gspin-assert.c gspin-alloc.c gspin-mempool.c gspin-io.c gspin-aux.c gspin-list.c gspin-tel.c'
+DRI_CFILES='gspin-test-driver.c'
+CFILES="$DEV_CFILES $DRI_CFILES"
+
+rm -f gspin gspin-debug libgspin.a tags *.[iosB]
+~/src/ctags-5.5.4/ctags *.[ch]
+
+echo PROD-BUILD:
+$CC -UIs_True_On -O0 -m32 -Wformat -Wswitch $DEV_CFILES $DRI_CFILES -o gspin
+
+echo LIBRARY-BUILD:
+$CC -DIs_True_On=1 -O0 -m32 -Wformat -Wswitch -g -c $DEV_CFILES 
+ar rc libgspin.a *.o
+rm -f *.o
+
+echo DEV-BUILD:
+$CC -DIs_True_On=1 -O0 -g -m32 -Wformat -Wswitch $DRI_CFILES -L. -lgspin -o gspin-debug
+
+------
+run `make gspin42` in the libspin/ to generate gspin42. To debug a
+-gnu42 front-end, pass the .spin file to gspin42, you will see a text
+version of the IR in stdout.
+
+--------------------
+In order to be able to dump the GCC intermediate representation to a
+file, libspin defines its own .spin file format. The .spin file format
+has a data structure modeled after GCC's intermediate representation.
+The effect is that if GCC changes its representation, a corresponding
+change needs to be put in libspin. Thus, many constructs in libspin are
+defined to give 1-to-1 correspondence to constructs in GCC.
+--------------------
+Start with GNU compiler configured for X86-64
+New Way:
+gspin tree nodes – components to model GNU trees
+Utilities implemented in libspin repository
+gspin tree nodes dumped out to .spin file
+Identify points to intercept GNU trees in gcc’s compilation
+gspin tree nodes generated from GNU trees in gcc/tree.c
+open64/wgen translates gspin tree nodes (.spin file) to WHIRL nodes (.B
+file)
+wgen's mode of operation modeled after kgccfe/kg++fe
+
+
+GSPIN tree nodes
+
+Purpose: encode complete information in GNU trees for dumping to .spin file
+8-byte sized gspin node as atomic building block
+defined in libspin/gspin-tree.h
+represents a field of information in GNU's tree node
+aggregate of contiguous gspin nodes represents a GNU tree node
+representation scheme defined in libspin/gspin-tel.h
+Allocation of gspin nodes managed by libspin
+I/O of gspin nodes via mmap()
+ASCII dumper
+Each node only dumped once to avoid infinite recursion
+
+Example of GSPIN nodes
+
+GNU’s PLUS tree node has 14 fields
+Root gspin node to encode PLUS
+13 more gspin nodes for rest of fields
+
+------
+tree_code = PLUS
+0 tree-code_class = BINARY
+1 tree_type
+2 tree_chain = NULL
+3 flags
+4 arity = 13
+5 file name
+6 line no
+7 operand 0
+8 operand 1
+9 unused
+10 unused
+11 unused
+12 unused
+
+

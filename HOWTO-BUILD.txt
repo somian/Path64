@@ -1,0 +1,5 @@
+# Copyright (C) PathScale Inc. 2009
+
+From the top level source directory please run
+	% ./configure
+	% make

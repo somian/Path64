@@ -1,0 +1,74 @@
+<!--
+
+Copyright 2004, 2005, 2006 PathScale, Inc.  All Rights Reserved.
+
+Unpublished -- rights reserved under the copyright laws of the United
+States. USE OF A COPYRIGHT NOTICE DOES NOT IMPLY PUBLICATION OR
+DISCLOSURE. THIS SOFTWARE CONTAINS CONFIDENTIAL INFORMATION AND TRADE
+SECRETS OF PATHSCALE, INC. USE, DISCLOSURE, OR REPRODUCTION IS
+PROHIBITED WITHOUT THE PRIOR EXPRESS WRITTEN PERMISSION OF PATHSCALE,
+INC.
+
+U.S. Government Restricted Rights:
+
+The Software is a "commercial item," as that term is defined at 48
+C.F.R. 2.101 (OCT 1995), consisting of "commercial computer software"
+and "commercial computer software documentation," as such terms are
+used in 48 C.F.R. 12.212 (SEPT 1995).  Consistent with 48
+C.F.R. 12.212 and 48 C.F.R. 227-7202-1 through 227-7202-4 (JUNE 1995),
+all U.S. Government End Users acquire the Software with only those
+rights set forth in the accompanying license agreement.
+
+PathScale, Inc. 2071 Stierlin Court, Suite 200; Mountain View CA 94043.
+
+int C base: -O3 -ipa
+int C++ base: -Ofast
+fp C base: -Ofast -WOPT:mem_opnds=on
+fp Fortran base: -Ofast -LNO:fusion=2
+
+-->
+
+<!--
+
+Note:
+
+If you want to add to this file, you usually have to add things in at least 2 places.
+
+The structure works like this:
+
+Try -O2 with
+   -ipa and special -ipa options[*1]
+   plain -ipa and special -O2 options[*2]
+   no -ipa and special -O2 options[*2]
+Try -O3 with
+   -ipa and special -ipa options[*1]
+   plain -ipa and special -O3 options[*3]
+   no -ipa and special -O3 options[*3]
+
+Thus, there are 3 lists which appear twice each.
+
+-->
+
+<optionset>
+    <option name="-O2">
+       <option name="-ipa">
+          <optionlist mode="oneof" list="-IPA:callee_limit=5000 -IPA:ctype=on -IPA:linear=on -IPA:min_hotness=5 -IPA:plimit=525 -IPA:plimit=1800 -IPA:plimit=10000 -IPA:plimit=20000 -IPA:plimit=50000 -IPA:pu_reorder=2 -IPA:space=300 -IPA:space=1000"/>
+       </option>
+       <option name="-ipa">
+          <optionlist mode="oneof" list="-CG:gcm=off -CG:load_exe=0 -CG:load_exe=1 -CG:load_exe=2 -CG:local_fwd_sched=on -CG:p2align_freq=100000 -CG:p2align=on -CG:p2align_freq=500000 -CG:movnti=0 -CG:movnti=1 -GRA:optimize_boundary=on -INLINE:aggressive=on -OPT:IEEE_arith=3 -OPT:alias=disjoint -OPT:alias=restrict -OPT:alias=no_f90_pointer_alias -OPT:ro=3 -OPT:rsqrt=on -OPT:fast_sqrt=on -OPT:unroll_size=256 -OPT:unroll_times_max=8 -OPT:early_intrinsics=on -TENV:X=4 -WOPT:mem_opnds=on -WOPT:retype_expr=on -WOPT:val=0 -WOPT:val=2 -WOPT:aggstr=3 -WOPT:aggstr=0 -WOPT:aggstr=7 -WOPT:if_conv=0 -WOPT:if_conv=2 -OPT:speculate=on -WOPT:prop_dope=on -WOPT:unroll=0 -WOPT:unroll=2 -VHO:rotate=on -VHO:rotate=off -VHO:merge_thens=off -VHO:merge_elses=on -fno-math-errno -ffast-math -m3dnow -m32"/>
+       </option>
+       <optionlist mode="oneof" list="-CG:gcm=off -CG:load_exe=0 -CG:load_exe=1 -CG:load_exe=2 -CG:local_fwd_sched=on -CG:p2align_freq=100000 -CG:p2align=on -CG:p2align_freq=500000 -CG:movnti=0 -CG:movnti=1 -GRA:optimize_boundary=on -INLINE:aggressive=on -OPT:IEEE_arith=3 -OPT:alias=disjoint -OPT:alias=restrict -OPT:alias=no_f90_pointer_alias -OPT:ro=3 -OPT:rsqrt=on -OPT:fast_sqrt=on -OPT:unroll_size=256 -OPT:unroll_times_max=8 -OPT:early_intrinsics=on -TENV:X=4 -WOPT:mem_opnds=on -WOPT:retype_expr=on -WOPT:val=0 -WOPT:val=2 -WOPT:aggstr=3 -WOPT:aggstr=0 -WOPT:aggstr=7 -WOPT:if_conv=0 -WOPT:if_conv=2 -OPT:speculate=on -WOPT:unroll=0 -WOPT:unroll=2 -VHO:rotate=on -VHO:rotate=off -VHO:merge_thens=off -VHO:merge_elses=on -fno-math-errno -ffast-math -m3dnow -m32"/>
+    </option>
+    <option name="-O3">
+       <option name="-ipa">
+          <optionlist mode="oneof" list="-IPA:callee_limit=5000 -IPA:ctype=on -IPA:linear=on -IPA:min_hotness=5 -IPA:plimit=525 -IPA:plimit=1800 -IPA:plimit=10000 -IPA:plimit=20000 -IPA:plimit=50000 -IPA:pu_reorder=2 -IPA:space=300 -IPA:space=1000"/>
+       </option>
+       <option name="-ipa">
+          <optionlist mode="oneof" list="-CG:cflow=off -CG:gcm=off -CG:load_exe=0 -CG:load_exe=1 -CG:load_exe=2 -CG:local_fwd_sched=on -CG:p2align_freq=1 -CG:p2align=on -CG:prefetch=off -CG:use_movlpd=off -CG:use_test=on -CG:movnti=0 -CG:movnti=1 -GRA:home=off -GRA:optimize_boundary=on -INLINE:aggressive=on -LNO:cse=off -LNO:full_unroll=10 -LNO:full_unroll=5 -LNO:assume_unknown_trip_count=10 -LNO:assume_unknown_trip_count=100 -LNO:simd=2 -LNO:vintr=2 -LNO:vintr=0 -LNO:blocking=off -LNO:fusion=0 -LNO:fusion=2 -LNO:fission=1 -LNO:fission=2 -LNO:interchange=OFF -LNO:opt=0 -LNO:ou_max=5 -LNO:ou_prod_max=10 -LNO:prefetch=0 -LNO:prefetch=1 -LNO:prefetch_ahead=5  -LNO:prefetch_ahead=10 -LNO:sclrze=off -LNO:ignore_feedback=off -LNO:tlb1=64:tlb2=64:tlb_trustworthiness=20 -LNO:tlb_trustworthiness=75 -LNO:minvariant=off -LNO:build_scalar_reductions=on -OPT:IEEE_NaN_Inf=off -OPT:IEEE_arith=1 -OPT:IEEE_arith=3 -OPT:Ofast -OPT:alias=disjoint -OPT:alias=restrict -OPT:alias=no_f90_pointer_alias -OPT:fast_complex -OPT:goto=off -OPT:ro=3 -OPT:rsqrt=on -OPT:fast_sqrt=on -OPT:treeheight=on -OPT:unroll_analysis=off -OPT:unroll_size=0 -OPT:unroll_size=128 -OPT:unroll_size=256 -OPT:unroll_times_max=8 -OPT:unroll_times_max=16 -OPT:early_intrinsics=on -TENV:X=4 -TENV:frame_pointer=off -WOPT:mem_opnds=on -WOPT:retype_expr=on -WOPT:val=0 -WOPT:val=2 -WOPT:aggstr=3 -WOPT:aggstr=0 -WOPT:aggstr=7 -WOPT:if_conv=0 -WOPT:if_conv=2 -OPT:speculate=on -WOPT:prop_dope=on -WOPT:unroll=0 -WOPT:unroll=2 -VHO:rotate=on -VHO:rotate=off -VHO:merge_thens=off -VHO:merge_elses=on -fno-exceptions -fno-math-errno -ffast-math -m3dnow -m32 -OPT:fold_unsafe_relops=on:fold_unsigned_relops=on -OPT:transform_to_memlib=off"/>
+        </option>
+        <optionlist mode="oneof" list="-CG:cflow=off -CG:gcm=off -CG:load_exe=0 -CG:load_exe=1 -CG:load_exe=2 -CG:local_fwd_sched=on -CG:p2align_freq=1 -CG:p2align=on -CG:prefetch=off -CG:use_movlpd=off -CG:use_test=on -CG:movnti=0 -CG:movnti=1 -GRA:home=off -GRA:optimize_boundary=on -INLINE:aggressive=on -LNO:cse=off -LNO:full_unroll=10 -LNO:full_unroll=5 -LNO:assume_unknown_trip_count=10 -LNO:assume_unknown_trip_count=100 -LNO:simd=2 -LNO:vintr=2 -LNO:vintr=0 -LNO:blocking=off -LNO:fusion=0 -LNO:fusion=2 -LNO:fission=1 -LNO:fission=2 -LNO:interchange=OFF -LNO:opt=0 -LNO:ou_max=5 -LNO:ou_prod_max=10 -LNO:prefetch=0 -LNO:prefetch=1 -LNO:prefetch_ahead=5  -LNO:prefetch_ahead=10 -LNO:sclrze=off -LNO:ignore_feedback=off -LNO:tlb1=64:tlb2=64:tlb_trustworthiness=20 -LNO:tlb_trustworthiness=75 -LNO:minvariant=off -LNO:build_scalar_reductions=on -OPT:IEEE_NaN_Inf=off -OPT:IEEE_arith=1 -OPT:IEEE_arith=3 -OPT:Ofast -OPT:alias=disjoint -OPT:alias=restrict -OPT:alias=no_f90_pointer_alias -OPT:fast_complex -OPT:goto=off -OPT:ro=3 -OPT:rsqrt=on -OPT:fast_sqrt=on -OPT:treeheight=on -OPT:unroll_analysis=off -OPT:unroll_size=0 -OPT:unroll_size=128 -OPT:unroll_size=256 -OPT:unroll_times_max=8 -OPT:unroll_times_max=16 -OPT:early_intrinsics=on -TENV:X=4 -TENV:frame_pointer=off -WOPT:mem_opnds=on -WOPT:retype_expr=on -WOPT:val=0 -WOPT:val=2 -WOPT:aggstr=3 -WOPT:aggstr=0 -WOPT:aggstr=7 -WOPT:if_conv=0 -WOPT:if_conv=2 -OPT:speculate=on -WOPT:unroll=0 -WOPT:unroll=2 -VHO:rotate=on -VHO:rotate=off -VHO:merge_thens=off -VHO:merge_elses=on -fno-exceptions -fno-math-errno -ffast-math -m3dnow -m32 -OPT:fold_unsafe_relops=on:fold_unsigned_relops=on -OPT:transform_to_memlib=off"/>
+    </option>
+</optionset>
+
+
+

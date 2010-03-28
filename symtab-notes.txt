@@ -1,0 +1,414 @@
+# Copied from http://oss.sgi.com/archives/mbox/pro64-support/2001-02
+# TODO : Needs to be cleaned up and accurately reflect what the sources says
+
+From:   Jim Kingdon <jkingdon@cthulhu.engr.sgi.com>
+X-Mailer: Mozilla 4.7C-SGI [en] (X11; I; IRIX 6.5 IP32)
+X-Accept-Language: en
+MIME-Version: 1.0
+To:     Xiaolin Park <xlpark@kankou.cs.uec.ac.jp>
+CC:     pro64-support@oss.sgi.com
+Subject: Re: Symbol Table Interfaces
+References: <sv21yszckzd.wl@ikura.watalab.cs.uec.ac.jp>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pro64-support@oss.sgi.com
+Precedence: bulk
+Return-Path: <owner-pro64-support@oss.sgi.com>
+X-Orcpt: rfc822;pro64-support-outgoing
+
+Xiaolin Park wrote:
+> http://sahara.mti.sgi.com/Projects/Symtab/porting.html
+> But this website is down.
+> So, Could anyone tell where can I find the Symbol Table Interfaces documents?
+
+Hmm, I've included some excerpts at the end of this
+message.  I've omitted the parts which are about the
+difference between the 7.2 and 7.3 compilers on the
+theory that they would just be confusing.
+
+You probably want to use this as a starting point and
+treat the source code (for example, the .h files
+mentioned below) as the authoritative source.  I
+don't really know how up to date porting.html is.
+The last edit is shown as 1997.
+
+--------- begin excerpts from porting.html
+Scope Array
+
+Section 2.2 of the symtab spec. describes the concept of the Scope
+array,
+which replaces the SYMTAB entries.  For all phases except IPA and the
+inliner, a single global Scope array Scope_tab is defined.  Through 
+Scope_tab all symbol table information visible to a PU can be obtained. 
+There are two predefined indices to Scope_tab:  GLOBAL_SYMTAB for the
+global symbol table and CURRENT_SYMTAB for the local symbol table.  Here
+are some examples: 
+
+    // check if an ST_IDX refers to the global symtab 
+    if (ST_IDX_level (WN_st_idx (wn)) == GLOBAL_SYMTAB) 
+        ... 
+    // in a nested PU, check if an ST_IDX refers to a local 
+    // variable in the parent PU 
+    ST_IDX st_idx = WN_st_idx (wn); 
+    if (st_idx != GLOBAL_SYMTAB && 
+        st_idx < CURRENT_SYMTAB) { 
+        ... 
+    } 
+  
+
+
+Accessing The Symbol Tables
+
+The following table describes how each symbol table structure can be
+referenced: 
+  
+  Class
+  Name
+            Index
+            Type
+                     Table Name
+                                      Entry Access
+                                                         Access
+                                                          Cost
+ ST
+         ST_IDX
+                     St_Table
+                                 ST_IDX idx;   
+                                 ST& st = St_Table[idx];
+                                                           high
+ PU
+         PU_IDX
+                     Pu_Table
+                                 PU_IDX idx;   
+                                 PU& pu = Pu_Table[idx];
+                                                           low
+ TY
+         TY_IDX
+                     Ty_Table
+                                 TY_IDX idx;   
+                                 TY& ty = Ty_Table[idx];
+                                                           ~low
+ FLD
+         FLD_IDX
+                     Fld_Table
+                                 FLD_IDX idx;   
+                                 FLD& fld =
+                                 Fld_Table[idx];
+                                                           low 
+ ARB
+         ARB_IDX
+                     Arb_Table
+                                 ARB_IDX idx;   
+                                 ARB& arb =
+                                 Arb_Table[idx];
+                                                           low
+ TYLIST
+         TYLIST_IDX
+                     Tylist_Table
+                                 TYLIST_IDX idx;    
+                                 TYLIST& tylist =
+                                 Tylist_Table[idx];
+                                                           low
+ TCON
+         TCON_IDX
+                     Tcon_Table
+                                 TCON_IDX idx;   
+                                 TCON& tcon =
+                                 Tcon_Table[idx];
+                                                           low
+ INITO
+         INITO_IDX
+                     Inito_Table
+                                 INITO_IDX idx;   
+                                 INITO& inito =
+                                 Inito_Table[idx];
+                                                           high
+ INITV
+         INITV_IDX
+                     Initv_Table
+                                 INITV_IDX idx;   
+                                 INITV& initv =
+                                 Initv_Table[idx];
+                                                           low
+ LABEL
+         LABEL_IDX
+                     Label_Table
+                                 LABEL_IDX idx;   
+                                 LABEL& label =
+                                 Label_Table[idx];
+                                                          medium
+ PREG
+         PREG_IDX
+                     Preg_Table
+                                 PREG_IDX idx;   
+                                 PREG& preg =
+                                 Preg_Table[idx];
+                                                          medium
+         STR_IDX
+                     Str_Table
+                                 STR_IDX idx;   
+                                 char *str =
+                                 &Str_Table[idx];
+                                                         very low
+
+  
+The XX_IDX should always be used to identify an entry of a table,
+especially when being passed as parameter.  On the other hand, it is
+safe
+to store away the address of an entry for faster access to multiple
+fields
+within it.  For example: 
+
+void foo (TY_IDX ty_idx) 
+{ 
+    const TY& ty = Ty_Table[ty_idx]; 
+
+    if (TY_kind(ty) == KIND_STRUCT && 
+        TY_is_union (ty) && 
+        TY_no_ansi_alias(ty)) { 
+        ... 
+    } 
+} 
+
+The only exception is ST.  Due to the high cost to access an ST entry
+via
+the ST_IDX, it has been accepted as a convention that ST entries are
+identified by "ST*" and this is the preferred way to pass an ST entry as
+function parameter.  The ST_IDX of an ST entry is stored in the entry
+itself and can be accessed via the ST_st_idx() function.  For example: 
+
+// check if the given ST entry is based on another block 
+// pass in ST* instead of ST_IDX 
+inline BOOL 
+Has_Base_Block (const ST* s) { 
+    // check if the base index is the same as itself 
+    return ST_base_idx (s) != ST_st_idx (s); 
+} 
+
+Note that the Whirl nodes now hold an ST_IDX instead of ST*, and the
+access functions have been redefined as follow: 
+
+#define WN_st_idx(x)    ((x)->u1u2.uu.ub.st) 
+inline ST* WN_st (const WN *wn) { 
+    return &St_Table[WN_st_idx (wn)]; 
+} 
+
+Typical uses: 
+
+    if (ST_sclass (WN_st (wn)) == SCLASS_AUTO) ... 
+    WN_st_idx (wn) = ST_st_idx (st); 
+
+In other cases where you need to convert an ST_IDX to ST*, you
+can use &St_Table[st_idx]. 
+
+Access Functions for Data Members
+
+For each symbol table class, a set of access functions is derived from
+the
+data member.  In general: 
+
+    XX_yyy(const XX& xx) returns the value of data member yyy of class
+    XX, specified by xx. 
+    Set_XX_yyy (XX& xx, type_of_yyy val) set the value of yyy to val. 
+
+Flag names of a class are always upper-case, prefixed by the name of
+the class.  For example, if XX_FLAG1 is a flag of class XX: 
+
+    XX_flag1 (const XX& xx) returns TRUE if XX_FLAG1 is set. 
+    Set_XX_flag1 (XX& xx) sets XX_FLAG1 to TRUE. 
+    Clear_XX_flag1 (XX& xx) sets XX_FLAG1 to FALSE. 
+
+Note that the access functions take a reference type (XX&) as parameter,
+except: 
+
+    For ST's, overloaded versions that takes ST* are also defined. 
+    Some of the commonly used access functions for TY also accept
+    TY_IDX as parameter.  These functions are more expensive and if
+    multiple fields of a TY are accessed, it is better to convert the
+TY_IDX
+    to TY& first and use that instead. 
+    The access functions are defined in symtab_access.h. 
+
+
+
+Creating a Symbol Table Entry
+
+For each class XX, the functions  New_XX() and XX_Init() are defined. 
+For example: 
+
+    TY_IDX ty_idx; 
+
+    // New_TY returns an uninitialized TY entry, 
+    // and set the index in the reference parameter ty_idx 
+    TY& ty = New_TY (ty_idx); 
+
+    // The init routine takes values of most commonly used fields, and
+
+    // zero out the remaining fields. 
+    // Always initialize the entry right after calling New. 
+    TY_Init (ty, 4 KIND_SCALAR, MTYPE_I4, Save_Str ("foo")); 
+
+    // Other attributes must be set after calling TY_Init 
+    Set_TY_align (ty_idx, 4); 
+
+    // Should always return TY_IDX instead of TY& 
+    return ty_idx; 
+
+
+Organization of the Symbol Table Headers
+
+The following table should give you a rough idea where to look for the
+functions that you need. 
+  
+         File name
+                                     Description
+    symtab.h
+                        This is the only symtab header to be
+                        #include'd.  It also contains overloaded
+                        access functions and other trivial inlined
+                        utility functions.
+    symtab_defs.h
+                        Class definitions of ST, FLD, ARB, LABEL,
+                        PREG, TY, PU, BLK, SCOPE, and FILE_INFO.
+                        Declarations of all the Xx_Table's.
+    symtab_idx.h
+                        Definitions of all XX_IDX's.
+    symtab_access.h
+                        Definitions of all access functions that are
+                        mechanically derived from the classes.
+    symtab_utils.h
+                        Declarations of non-trivial utility
+                        functions.
+    symtab_verify.h
+                        Declarations of symbol table verifier
+                        functions.
+    symtab_compatible.h
+                        Definitions of inlined functions for
+                        compatibility with old symbol table. 
+                        These functions are defined only to make
+                        the transition to new symbol format
+                        easier, and they will be removed after the
+                        transition period.
+    irbdata_defs.h
+                        Class definitions of INITO and INITV.
+    irbdata.h
+                        Access functions and utilities functions
+                        for INITO and INITV.
+    strtab.h
+                        String table utilities.
+
+
+
+Iterators
+
+For each class XX, a forward iterator XX_ITER is defined.  You can
+create
+an iterator pointing to a specified entry using the Make_xx_iter
+function.  For example: 
+
+    FLD_IDX fld_idx = TY_fld (ty); 
+
+    // Create an iterator pointing to the entry given by fld_idx 
+    FLD_ITER fld_iter = Make_fld_iter (fld_idx); 
+    do { 
+        // operator* dereference the iterator 
+        FLD& fld = *fld_iter; 
+        ... 
+    } while (!FLD_last_field (*fld_iter++)); 
+
+The pre/post increment operator ++ increment the iterator to the next
+entry.  You can also compare iterators using the == and != operators. 
+
+The total number of entries in a table can be obtained by the
+XX_Table_Size function. 
+
+Fast Iteration Through All Entries
+
+The above iterator is good for iterating a small number of entries.  If
+you
+need to go through the entire table, you should use the more efficient
+iterator function For_all.  For example, suppose we want to go through
+all the PUs and clear the PU_NO_SIDE_EFFECTS bit: 
+
+    // Function object that defines the operation 
+    struct clear_no_se { 
+        // First argument is the array index of the current entry,
+ignored in this case 
+        // Second argument is the pointer to the current entry 
+        void operator() (UINT32, const PU* pu) const { 
+            Clear_PU_no_side_effects (*pu); 
+        } 
+    }; 
+
+    void Clear_all_pu_side_effect () 
+    { 
+        // Pass in an anonymous function object 
+        For_all (Pu_Table, clear_no_se()); 
+    } 
+
+You can replace the function object by a function pointer, but the
+function object is much more efficient because it is a direct function
+call
+instead of an indirect call via a function pointer. 
+
+Note that these functions always iterate from the 2nd entry of the table
+till the last one.  The first entry of each table, by definition, is
+reserved
+and zero'ed. 
+
+Fast iteration with early exit
+
+If you want to exit from the loop before reaching the end, you can use
+the For_all_until function.  Just define the function object to return
+TRUE when the termination condition is satisfied.  If the termination
+condition is never satisfied, it will return 0: 
+
+    struct find_ty_by_name { 
+        const char* name; 
+
+        find_ty_by_name (const char* str) : name (str) {} 
+
+        // return TRUE when the name strings match 
+        BOOL operator() (UINT32, const TY* ty) const { 
+            return strcmp (TY_name (*ty), name) == 0; 
+        } 
+    }; 
+
+    TY_IDX Find_ty (const char* name) 
+    { 
+        TY_IDX idx = For_all_until (Ty_Table, find_ty_by_name
+(name)); 
+
+        // If entry is not found, idx will be 0 
+        return idx; 
+    } 
+
+
+Symbol Table Verifier
+
+We have implemented a symbol table verifier that examines every field
+in each symbol table data structure against the specification.  It is
+called
+at the end of each compiler phase.  Additionally, the following
+interfaces
+are provided so you can invoke the verifier explicitly.  The only
+assumption is that the symbol table needs to be in a consistent state
+when you invoke the verifier (i.e., not partially updated). 
+
+extern void Verify_LOCAL_SYMTAB (const SCOPE&, SYMTAB_IDX); 
+
+extern void Verify_GLOBAL_SYMTAB (); 
+
+inline void Verify_SYMTAB (SYMTAB_IDX level) 
+{ 
+    if (level > GLOBAL_SYMTAB) 
+        Verify_LOCAL_SYMTAB (Scope_tab[level], level); 
+    else 
+        Verify_GLOBAL_SYMTAB (); 
+} 
+
+To verify the entire symbol table: 
+
+    for (SYMTAB_IDX i = GLOBAL_SYMTAB; i <= CURRENT_SYMTAB; ++i) 
+        Verify_SYMTAB (i);
+

@@ -1,0 +1,114 @@
+.\" '\" Copyright (C) 2007 PathScale, LLC.  All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2006, 2007 QLogic Corporation. All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2003, 2004, 2005 PathScale, Inc.  All Rights Reserved.
+.\" '\"
+.\" '\" This is not free software.
+.\" '\" Redistribution or modification is prohibited without the prior
+.\" '\" express written permission of PathScale, LLC.
+.\" '\"
+.\" .ad 7
+.TH "compiler.defaults" "5" "" "PathScale, LLC." "PathScale Compiler Suite"
+.SH "NAME"
+\fBcompiler.defaults\fR - Default options for the PathScale(TM) Compiler Suite
+.SH "DESCRIPTION"
+This manual page describes the \fIcompiler.defaults\fR (or simply
+\*(lqdefaults\*(rq) file, which contains default options for the
+PathScale \fBpathcc\fR, \fBpathCC\fR, and \fBpathf95\fR
+compilers.
+.PP
+The defaults file makes it possible to provide arguments to the
+compiler which it will treat as if they were passed to it on the
+command line.  For example, you can use the defaults file to provide a
+set of additional include or library directories to search, or to
+specify some default compiler optimization flags.
+.SH "USAGE"
+The format of the defaults file is simple.  Each line can contain
+compiler options, separated by white space, followed by an optional
+comment.  A comment begins with the "#" character, and ends at the end
+of a line.  Empty lines and lines containing only comments are
+skipped.
+.PP
+Options are added to the command line in the order in which they
+appear in the defaults file.  Every option is included
+unconditionally.
+.PP
+For exclusive options, the command line takes precedence over the
+defaults file.  For example, if the defaults file contains the "-O3"
+option, but the compiler is invoked with "-O2" on the command line, it
+will behave as if invoked with "-O2" alone, because "-O2" and "-O3"
+are exclusive options.
+.PP
+For additive options, the command line is used before the defaults
+file.  For example, if the defaults compile contains
+"-I\fI/usr/foo\fR" and the command line contains "-I\fI/usr/bar\fR",
+the compiler will behave as if invoked with "-I\fI/usr/bar\fR
+-I\fI/usr/foo\fR".
+.PP
+.SH "EXAMPLES"
+Here is an example defaults file:
+.ne 9
+.sp
+.RS
+.nf
+# PathScale compiler defaults file.
+#
+# Set default CPU type to optimize for, since all of our
+# systems use the same CPUs.
+-march=opteron
+# We have a recent Opteron CPU stepping, so it's safe to
+# always use SSE3.
+-msse3
+# Ensure that the FFTW library is available to users, so
+# they don't need to remember where it's installed.
+-L/share/fftw3/lib
+-I/share/fftw3/include
+.fi
+.RE
+
+.SH "QUOTING"
+The defaults file supports the backslash ("\\") escape character and basic
+shell-like quoting.  A backslash followed by a character translates into the
+character itself.  Hence "\\#" means "#", and "\\\\" means "\\".  Characters
+inside single quotes ('...') are taken literally, including the backslash
+character.  Characters inside double quotes ("...") are taken literally except
+for backslash escape sequences.  For example, both of these specify the same
+search directory whose name contains spaces as well as the "#" and "\\"
+characters:
+.ne 9
+.sp
+.RS
+.nf
+-I'/foo # \\bar'
+-I"/foo # \\\\bar"
+.fi
+.RE
+
+.SH "FILES"
+By default, the defaults file is searched for in the \fIetc\fR
+directory under the tree in which the PathScale compilers are installed.
+For example, if the compilers are installed in \fI/opt/pathscale\fR,
+they will attempt to open and read a defaults file named
+\fI/opt/pathscale/etc/compiler.defaults\fR.
+.SH "ENVIRONMENT"
+The environment variable \fBPSC_COMPILER_DEFAULTS_PATH\fR, if it
+exists, should contain a colon-separated list of directories in which
+the compilers will search for a \fIcompiler.defaults\fR file.  The
+first defaults file to be found in this path is the only one that will
+be used.
+.PP
+If this environment variable is set, the compilers will not search the
+install directory for a defaults file.
+.SH "BUGS"
+The defaults file has no conditional evaluation or substitution
+features, so it is not possible to, for example, specify
+architecture-specific options (such as library search paths) that will
+not be used in incompatible compilation modes.  We recommend
+using the \fBPSC_COMPILER_DEFAULTS_PATH\fR environment variable to
+specify a different defaults file for different target architectures.
+.SH "SEE ALSO"
+\fBpathcc\fR(1), \fBpathCC\fR(1), \fBpathf95\fR(1),
+\fBeko\fR(7), \fBpathscale_intro\fR(7)
+.PP
+Online documentation available at http://www.pathscale.com/docs.html

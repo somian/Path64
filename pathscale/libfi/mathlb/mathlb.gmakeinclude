@@ -1,0 +1,176 @@
+# -*- Makefile -*-
+#
+# USMID @(#) libfi/mathlb/mathlb.makeinclude	92.10	11/22/99 10:13:02
+#
+#  Copyright (C) 2007, 2008. Pathscale, LLC.  All Rights Reserved.
+#
+#  Copyright (C) 2006, 2007. QLogic Corporation. All Rights Reserved.
+#
+#  Copyright (C) 2000, 2001 Silicon Graphics, Inc.  All Rights Reserved.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of version 2.1 of the GNU Lesser General Public License 
+#  as published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it would be useful, but
+#  WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+#
+#  Further, this software is distributed without any warranty that it is
+#  free of the rightful claim of any third person regarding infringement 
+#  or the like.  Any license provided herein, whether implied or 
+#  otherwise, applies only to this software file.  Patent licenses, if
+#  any, provided herein do not apply to combinations of this program with 
+#  other software, or any other product whatsoever.  
+#
+#  You should have received a copy of the GNU Lesser General Public 
+#  License along with this program; if not, write the Free Software 
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston MA 02111-1307, 
+#  USA.
+#
+#  Contact information:  Silicon Graphics, Inc., 1600 Amphitheatre Pky,
+#  Mountain View, CA 94043, or:
+#
+#  http://www.sgi.com
+#
+#  For further information regarding this notice, see:
+#
+#  http://oss.sgi.com/projects/GenInfo/NoticeExplan
+#
+#
+
+IEMIPS =
+ifneq ($(BUILD_OS_LINUX_OR_DARWIN), TRUE)
+ifeq ($(BUILD_ARCH), MIPS3)
+IEMIPS =\
+    ieee_mips.c
+endif
+ifeq ($(BUILD_ARCH), MIPS4)
+IEMIPS =\
+    ieee_mips.c
+endif
+endif
+
+CFILES += \
+    ceiling.c \
+    chtoi.c \
+    chton.c \
+    cot.c \
+    ctoi.c \
+    cton.c \
+    dcot.c \
+    dsign.c \
+    dtan.c \
+    exponent.c \
+    floor.c \
+    fp_class_h.c \
+    fp_class_r.c \
+    fp_class_d.c \
+    fraction.c \
+    hcot.c \
+    hsign.c \
+    htoi.c \
+    hton.c \
+    iabs.c \
+    ieee_binary_scale_d_i.c \
+    ieee_binary_scale_d_n.c \
+    ieee_binary_scale_h_i.c \
+    ieee_binary_scale_h_n.c \
+    ieee_binary_scale_r_i.c \
+    ieee_binary_scale_r_n.c \
+    ieee_exponent_d.c \
+    ieee_exponent_h.c \
+    ieee_exponent_i.c \
+    ieee_exponent_i1.c \
+    ieee_exponent_i2.c \
+    ieee_exponent_n.c \
+    ieee_exponent_r.c \
+    ieee_int.c \
+    ieee_module_support.c \
+    ieee_next_after.c \
+    ilen.c \
+    iso_c_binding_support.c \
+    itoi.c \
+    nabs.c \
+    nearest.c \
+    nton.c \
+    random.c \
+    ransed.c \
+    rrspacing.c \
+    rtoi.c \
+    rton.c \
+    scale.c \
+    set_exponent.c \
+    sign.c \
+    snglr.c \
+    spacing.c \
+    $(IEMIPS)
+
+# Older gfortran can't compile these at all, and to work properly we need to
+# use pathscale-specific option -Wf,-intrinsic_module_gen anyway
+ifneq (,$(findstring path,$(F90)))
+F90FILES += \
+    ieee_features.F90 \
+    ieee_arithmetic.F90 \
+    ieee_exceptions.F90 \
+    iso_c_binding.F90 \
+    iso_fortran_env.F90
+endif
+
+SRC_DIRS += \
+   $(BUILD_TOT)/libfi/mathlb
+
+bind_implemented := $(shell echo "common /c/i; bind(c)::/c/; end" > testbind.f90; if $(F90) testbind.f90; then echo U; else echo D; fi)
+
+ifeq (path, $(findstring path,$(F90)))
+# We're assuming that any .F90 module in this directory is supposed to be
+# an "intrinsic module" (in the F2003 sense of the term.) If not, this option
+# should be used only for such modules (e.g. ieee_arithmetic, ieee_exceptions,
+# ieee_features, iso_fortran_env.) This will work only when using pathf90 to
+# compile. $(BUILD_COMPILER) isn't a reliable indicator of this.
+FFLAGS += \
+   -Wf,-intrinsic_module_gen
+
+# Backward compatibility: if we try to compile with an old pathf90 which
+# doesn't implement "bind(c)", quietly skip contents of iso_c_binding.F90
+FFLAGS += \
+   -$(bind_implemented)NOBIND
+else
+# gfortran issues an irrelevant warning on iso_c_binding.F90 which causes
+# compilation to fail
+FFLAGS += -w
+endif
+
+# Program gen_ieee_cpp_macros generates file ieee_cpp_macros.h, which is
+# needed by the TR15580/F2003 IEEE intrinsic modules
+ifneq ($(BUILD_TARGET), MIPS)
+
+gen_ieee_cpp_macros: gen_ieee_cpp_macros.c
+
+else
+
+# HACK: We must compiler for HOST machine, not TARGET machine, but we want
+# use symbol values (such as FN_NAN) defined for the TARGET machine
+ifeq ($(BUILD_HOST), MIPS)
+HOSTABIFLAG = -mabi=n32
+else
+# I don't think this is correct
+#HOSTABIFLAG = -m32
+endif
+
+gen_ieee_cpp_macros: $(BUILD_TOT)/libfi/mathlb/gen_ieee_cpp_macros.c
+	gcc $(HOSTABIFLAG) $(BUILD_TOT)/libfi/mathlb/gen_ieee_cpp_macros.c -I/usr/mips64el-gentoo-linux-gnu/usr/include -I$(BUILD_TOT)/clibinc -D_SGI_SOURCE -D_LANGUAGE_C -Wformat -funsigned-char -D__GNU_BUG_WORKAROUND -D_LITTLE_ENDIAN -DKEY -Werror -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_WORD32 -D_LIB_INTERNAL -D_GNU_SOURCE -U__mips -D_MIPSEL -D_MIPS_SIM=_ABIN32 -D_LONGLONG -D_MIPS_SZINT=32 -D_MIPS_SZPTR=32 -D_MIPS_SZLONG=32 -MMD -o gen_ieee_cpp_macros
+
+endif
+
+ieee_cpp_macros.h: gen_ieee_cpp_macros
+	./gen_ieee_cpp_macros > ieee_cpp_macros.h
+
+ieee_exceptions.o     ieee_arithmetic.o     iso_fortran_env.o \
+ieee_exceptions.pic.o ieee_arithmetic.pic.o iso_fortran_env.pic.o \
+ieee_exceptions.pg.o  ieee_arithmetic.pg.o  iso_fortran_env.pg.o \
+: ieee_cpp_macros.h
+
+LF77INCS += -I$(BUILD_AREA)/libfortran
+
+LDIRT = gen_ieee_cpp_macros ieee_cpp_macros.h $(XMATHLBDIRT)

@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Copyright 2004, 2005, 2006 PathScale, Inc.  All Rights Reserved.
+#
+# fsymlist extracts a list of Fortran symbols from a library.
+
+(
+for i in $*
+do
+    nm $i
+done
+) | awk '{
+    if(($2 == "T") && match($3, "_$")) {
+        gsub("__$", "_", $3);
+        gsub("_$", "", $3);
+        print $3 }
+}' |
+sort |
+uniq

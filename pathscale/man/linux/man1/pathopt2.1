@@ -1,0 +1,151 @@
+.\" '\" Copyright (C) 2007 PathScale, LLC.  All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2006, 2007 QLogic Corp.  All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2003, 2004, 2005, 2006 PathScale, Inc.  All Rights Reserved.
+.\" '\"
+.\" '\"Contact information:  PathScale, LLC., 2071 Stierlin Court, Suite 200,
+.\" '\"Mountain View CA 94043, USA, or:
+.\" '\"
+.\" '\"http://www.pathscale.com
+.\" '\"
+.\" .ad 1
+.TH "pathopt2" "1" "" "PathScale, LLC." "PathScale Compiler Suite"
+.SH "NAME"
+\fBpathopt2\fR 
+\- utility used to aid in tuning the PathScale compiler for higher
+performance with specific codes.
+
+.SH "SYNOPSIS"
+\fBBasic usage\fR
+
+\fBpathopt2\fR [\-\fIoptions\fR] <\fIbuild-command\fR> [\-\fIarg1\fR] ...
+
+.SH "DESCRIPTION"
+The \fBpathopt2\fR tool iteratively tests different compiler options
+and option combinations with a set of files, tracks the results,
+selects the best option(s) within a subgroup, and then elevates those
+options within the test hierarchy.
+.PP
+ \fBpathopt2\fR runs the build-command using a set of options
+specified in a supplied configuration file. \fBbuild-command\fR is
+either a PathScale compiler invocation command (pathcc, pathf95, pathCC), a
+\fBmake\fR command, or a script which eventually invokes the compiler,
+perhaps via a \fBmake\fR command. The character @ is replaced in the
+command with the option from configfile being considered.
+.PP
+\fBpathopt2\fR options are as follows:
+.TP
+\-\fBD\fR 
+Don't redirect I/O to /dev/null.
+.TP
+\-\fBf\fR <\fIconfigfile\fR> [ "pathopt2.xml" ]
+The \-\fBf\fR option is used to specify the filename of the
+\fBpathopt2\fR XML configuration file. If it is not specified, the
+tool will first check for a file called \fBpathopt2.xml\fR in the
+current working directory and use it if present, otherwise the tool
+will use the file
+\fB<\fIinstall_path\fR\fB>/pathscale/share/pathopt2/pathopt2.xml\fR
+provided with the compiler suite.
+.TP
+\-\fBg\fR <\fIexternal_configfile\fR> 
+Loads in additional user-defined configfile(s). This allows a user to
+extend the pathopt2.xml file without having to modify it.
+.TP
+\-\fBj\fR <\fInumber of jobs\fR> [ 1 ]
+Number of jobs to run with this command. The default is 1.
+.TP
+\-\fBM\fR <\fIdirectory name\fR> [ `pwd` ]
+Directory in which to run the pathopt2 tool. The default is the
+current working directory.
+.TP
+\-\fBn\fR iterations [1]
+Number of iterations to run on each option. The default is 1.
+.TP
+\-\fBr\fR <\fItest script\fR> [ same as command ] 
+Test script. The default is the same as the script listed as the
+build-command argument.
+.TP 
+\-\fBS\fR <\fIreal|user|system|timing-file|rate-file\fR> [ real ]
+Specifies the performance metric to be used by pathopt2:
+.RS
+.TP 4
+\fBreal\fR: 
+the elapsed real time (this is the default)
+.TP
+\fBuser\fR: 
+the CPU time spent executing in user mode
+.TP
+\fBsystem\fR: 
+the CPU time spent executing in system mode
+.TP
+\fBtiming-file\fR: 
+to use a file containing a timing value
+.TP
+\fBrate-file\fR: 
+to use a file containing a rate value
+.RE
+.IP
+The chosen metric is used to guide the choices made by the \fBpathopt2\fR
+algorithms when selecting options for the best performance, and is
+used to sort the final output.
+.IP
+The interpretation of real, user, and system time is the same as the
+\fBtime(1)\fR command. All three times will be displayed in the output.
+.IP
+Additionally, \fBpathopt2\fR allows arbitrary performance metrics to
+be used to guide option selection using the \fBtiming-file\fR and
+\fBrate-file\fR choices. When either of these options is used,
+\fBpathopt2\fR sets an environment variable called
+\fBPSC_METRIC_FILE\fR with the name of a temporary file before running
+the command. The \fBrun\fR command is required to write the
+performance metric into this file before it terminates.
+.IP
+\fBpathopt2\fR then opens this file, reads a value from the file
+interpreted as a double-precision floating-point number, and deletes
+the temporary file. The only interpretation placed on these values is
+that smaller is better for timing, and that larger is better for
+rate. The actual units of the values do not matter as far as
+\fBpathopt2\fR is concerned as it just performs relative comparisons.
+.RE
+.TP
+\-\fBt\fR <\fIexecution target\fR> [ first in file ]
+Use \fBexecution target\fR, which corresponds to an <execute> tag found
+in \fBconfigfile\fR. The default is the first target in
+\fBconfigfile\fR.
+.TP
+\-\fBT\fR
+Run script in temporary directory.
+.TP
+\-\fBv\fR
+Generate more verbose output. 
+.TP
+\-\fBw\fR <\fIcolumns for flags\fR> [ 40 ]
+Number of columns to use in formatting output. The default is 40. 
+.TP
+\-\fBX\fR 
+Don't print out a summary table.
+.TP
+\fBPathopt2 example\fR
+.TP
+For example, to build the program `factorial' using the options in the file
+`pathopt2.xml' use this command:
+.PP
+ $ pathopt2 -f pathopt2.xml -r ./factorial pathcc @ -o factorial factorial.c
+.SH "FILES"
+The pathopt2.xml configuration file is in <install_path>/pathscale/share/pathopt2.
+.SH "COPYRIGHT"
+Copyright (C) 2007 PathScale, LLC.  All Rights Reserved.
+.PP
+Copyright (C) 2006, 2007  QLogic Corp.  All Rights Reserved.
+.PP
+Copyright (C) 2006  PathScale, Inc.  All Rights Reserved.
+.SH "SEE ALSO"
+.PP
+\fBpathcc\fR(1)
+\fBpathf95\fR(1)
+\fBeko\fR(7)
+.PP
+PathScale Compiler Suite User Guide
+.PP
+Online documentation available at http://www.pathscale.com/docs.html

@@ -1,0 +1,38 @@
+.\" '\" Copyright (C) 2007 PathScale, LLC.  All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2006, 2007 QLogic Corp.  All Rights Reserved.
+.\" '\"
+.\" '\" Copyright (C) 2003, 2004, 2005 PathScale, Inc.  All Rights Reserved.
+.\" '\"
+.\" '\"Contact information:  PathScale, LLC., 2071 Stierlin Court, Suite 200,
+.\" '\"Mountain View CA 94043, USA, or:
+.\" '\"
+.\" '\"http://www.pathscale.com
+.\" '\"
+.TH "fsymlist" "1" "" "PathScale, LLC." "PathScale Compiler Suite"
+.SH "NAME"
+\fBfsymlist\fR
+\- Produce a list of Fortran symbols in a library
+.SH "SYNOPSIS"
+\fBfsymlist\fR
+\%\fIlibrary ...\fR
+.SH "DESCRIPTION"
+The \fBfsymlist\fR utility prints out a list of Fortran symbols found
+in the libraries passed on the command line.  One symbol is printed on
+each line.
+.PP
+This is useful for generating files to be passed to the \fI-ff2c-abi\fR
+option of the \fBpathf95\fI compiler.
+.SH "COPYRIGHT"
+Copyright (C) 2007 PathScale, LLC.  All Rights Reserved.
+.PP
+Copyright (C) 2006, 2007 QLogic Corp.  All Rights Reserved.
+.PP
+Copyright (C) 2004, 2005 PathScale, Inc.  All Rights Reserved.
+.SH "SEE ALSO"
+.PP
+\fBpathf95\fR(1)
+.PP
+PathScale Compiler Suite User Guide
+.PP
+Online documentation available at http://www.pathscale.com/docs.html
