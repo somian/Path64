@@ -1,12 +1,5 @@
 /*
- * Copyright (C) 2009. PathScale, LLC. All Rights Reserved.
- */
-/*
- * Copyright (C) 2006, 2007. QLogic Corporation. All Rights Reserved.
- */
-
-/*
- * Copyright 2005, 2006 PathScale, Inc.  All Rights Reserved.
+ * Copyright (C) 2005, 2006, 2007, 2009. PathScale Inc. All Rights Reserved.
  */
 
 /*

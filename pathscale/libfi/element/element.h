@@ -2,7 +2,7 @@
 Copyright 2005, 2006 PathScale, Inc.  All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify it
-under the terms of version 2 of the GNU General Public License as
+under the terms of version 3 of the GNU General Public License as
 published by the Free Software Foundation.
 
 This program is distributed in the hope that it would be useful, but
