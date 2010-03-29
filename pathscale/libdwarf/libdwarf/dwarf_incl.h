@@ -6,9 +6,9 @@
 
   Copyright (C) 2000, 2002, 2004 Silicon Graphics, Inc.  All Rights Reserved.
 
-  This program is free software; you can redistribute it and/or modify it
-  under the terms of version 2.1 of the GNU Lesser General Public License 
-  as published by the Free Software Foundation.
+   Path64 is free software; you can redistribute it and/or modify it
+   under the terms of the GNU Lesser General Public License as published by
+   the Free Software Foundation version 2.1
 
    Path64 is distributed in the hope that it will be useful, but WITHOUT
    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
@@ -21,15 +21,6 @@
    02110-1301, USA.
 
    Special thanks goes to SGI for their continued support to open source
-
-  Contact information:  Silicon Graphics, Inc., 1500 Crittenden Lane,
-  Mountain View, CA 94043, or:
-
-  http://www.sgi.com
-
-  For further information regarding this notice, see:
-
-  http://oss.sgi.com/projects/GenInfo/NoticeExplan
 
 */
 

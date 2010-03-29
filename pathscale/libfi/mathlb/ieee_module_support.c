@@ -1,21 +1,6 @@
 /*
  * Copyright 2005, 2006, 2007, 2008 PathScale Inc.  All Rights Reserved.
  *
-
-   Path64 is free software; you can redistribute it and/or modify it
-   under the terms of the GNU General Public License as published by
-   the Free Software Foundation version 3
-
-   Path64 is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with Path64; see the file COPYING.  If not, write to the Free
-   Software Foundation, 51 Franklin Street, Fifth Floor, Boston, MA
-   02110-1301, USA.
-
  */
 /*
    Copyright (C) 1997,99,2000, 2001, 2003, 2004 Free Software Foundation, Inc.
@@ -35,7 +20,9 @@
    You should have received a copy of the GNU Lesser General Public
    License along with the GNU C Library; if not, write to the Free
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307 USA.  */
+   02111-1307 USA.  
+
+*/
 
 #if defined(TARG_IA32) || defined(TARG_X8664)
 #  define X86 1
